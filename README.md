@@ -60,6 +60,40 @@ az group delete --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION
 ```
 After deleting the resource group, restart the Cloud Shell and try to run the code statement by statement by copying and pasting into Cloud Shell. If there are errors, look at the error messages and see if you can figure out what happened. Remember that some resources require names to be in a certain format or be unique. If you cannot find the reason for your error, do not hesitate to contact me (oystein.hellenes.grov@pwc.com)
 
+### Azure Functions (Optional)
+
+If you want to set up integrations to accounting systems you will need to use Azure Functions. Alternatively, you can use manual input from blob storage and in that case you may skip this section.
+
+#### Installation
+
+The Azure Functions integrations are set up using Python. The following is required to use Python in Azure Functions:
+
+1. Python 3.6, 3.7, or 3.8. You may download Python 3.8 from [here](https://www.python.org/downloads/release/python-381/. However, a simple and easy way to get going in Python is by downloading the [Anaconda](https://www.anaconda.com/distribution/) platform, which comes with an IDE, Jupyter and many popular Python Data Science libraries
+
+2. [Visual Studio Code](https://code.visualstudio.com/)
+
+3. [The Python extension](https://marketplace.visualstudio.com/items?itemName=ms-python.python) for Visual Studio Code
+
+4. [The Azure Functions extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions) for Visual Studio Code
+
+5. [Node.js](https://nodejs.org/en/)
+
+After installation, open the terminal in Visual Studio Code. `cd` into the *Azure Functions* folder in your local version of this git repository:
+
+```
+# Example, replace with your path
+cd G:\My Drive\06 Annet\Demo - Ressurser\finance-dashboard-demo-master\Azure Functions
+```
+
+Then, run the following command to deploy your code into the Azure Function App that you created in the setup script:
+
+```
+# Replace <your-function-app-name> with the name of your function app
+$FUNCTION_APP_NAME="<your-function-app-name>"
+func azure functionapp publish $FUNCTION_APP_NAME
+cd G:\My Drive\06 Annet\Demo - Ressurser\finance-dashboard-demo-master\Azure Functions
+```
+
 ### Data Factory Configuration
 
 ### PowerBI Configuration

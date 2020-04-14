@@ -1,4 +1,4 @@
-# Finans Dashboard Demo
+# Finance Dashboard Demo
 
 This project enables you to quickly set up Azure resources necessary to integrate with popular accounting systems and make the data available to users in Power BI. The project is designed to be reusable and extensible to other sources.
 

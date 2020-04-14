@@ -8,7 +8,7 @@ on:
 #
 # 1. Set up the following secrets in your repository:
 #   AZURE_FUNCTIONAPP_PUBLISH_PROFILE
-#
+# Note: Can alternatively use a service principle and the AZURE_CREDENTIALS secret
 # 2. Change these variables for your configuration:
 env:
   AZURE_FUNCTIONAPP_NAME: 'findemo-func' # set this to your application's name

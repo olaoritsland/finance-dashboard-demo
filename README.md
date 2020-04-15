@@ -6,6 +6,8 @@ This project enables you to quickly set up Azure resources necessary to integrat
 
 These instructions will enable you to set up the resources you require in your own Azure subscription. The instructions are designed for PwC Norway users with a Visual Studio Enterprise Subscription with monthly free credits of $150. Most configurations are set up in order to be as cheap as possible and with moderate use it should be possible to use less than your free credits. However, please monitor your costs to avoid any surprises.
 
+Note that this does not create a production-ready solution! Most settings are optimized for cheapness, not robustness or security. However, only a few changes in the configurations are necessary to create  a production-ready solution.
+
 ### Prerequisites
 
 This guide assumes that you have a Visual Studio Enterprise Subscription. If you do not have one, please fill out the form ... and send the email below to pwcuser@microsoft.com, with the form attached.

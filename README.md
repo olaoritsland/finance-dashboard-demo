@@ -91,9 +91,7 @@ git push -u origin master
 
 [Note: After pushing to your remote repository you will likely receive an email from GitHub stating that a deployment failed. This is because a GitHub action is set up in the repository which triggers deployment of a Python project to Azure Functions every time something is pushed to your repository. This deployment is not currently authenticated, but we will fix this later]
 
-**3. Go to portal.azure.com and log in with your PwC credentials:**
-
-![Azure login](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/azure_login.gif)
+**3. Go to portal.azure.com and log in with your PwC credentials**
 
 **4. Open the cloud shell and select Bash:**
 
@@ -107,11 +105,7 @@ git push -u origin master
 
 *db-template.bacpac* contains the information necessary to create an Azure SQL Database with a set of predefined tables.
 
-**6. Open the editor in Cloud Shell by clicking the {} icon and paste the contents of *azure_set_up_script.sh*:**
-
-![Paste script](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/paste_script.gif)
-
-Open *azure_set_up_script.sh* in a text editor on your machine. Copy the content and paste it into the Cloud Shell editor.
+**6. Open the editor in Cloud Shell by clicking the {} icon and paste the contents of *azure_set_up_script.sh* from your local repository**
 
 [Note: It may seem unnecessary to copy the content, paste it and save it to file instead of uploading the file to clouddrive and editing it. However, this is an easy way to avoid that the shell script fails because of [Windows-style line endings](https://stackoverflow.com/questions/426397/do-line-endings-differ-between-windows-and-linux)].
 
@@ -144,9 +138,7 @@ It is a bit of work to set up a local development environment for Azure Function
 
 In the repository there is a file called `.github/workflows/linux-python-functionapp-on-azure.yml`. This file contains instructions for deploying the code in the `azfunc` directory to your GitHub function whenever a change is pushed to the repository. For this to work, we need to give GitHub permission to deploy to your Function App: 
 
-1. The Azure setup script created an Azure Function App for you. Go to portal.azure.com and type `Function App` in the search bar and select your function app, which should be called *[your-project-name]-func*:
-
-![Function app](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/function_app.gif)
+1. The Azure setup script created an Azure Function App for you. Go to portal.azure.com and type `Function App` in the search bar and select your function app, which should be called *[your-project-name]-func*
 
 2. In the top menu, select *Get publish profile*, open the downloaded file and copy its content:
 

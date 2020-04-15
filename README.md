@@ -17,7 +17,7 @@ To complete the setup, you will require:
 * Git for Windows (this guide assumes you have Git for Windows, but you can use any Git command line tool)
 
 #### Visual Studio Enterprise Subscription
-This guide assumes that you have a Visual Studio Enterprise Subscription. If you do not have one, please fill out the [Visual Studio subscription enrollment form](https://github.com/PWCNORWAY/finance-dashboard-demo/utils/readme/Visual Studio Subscription Enrollment Form.docx) and send the email below to pwcuser@microsoft.com, with the form attached.
+This guide assumes that you have a Visual Studio Enterprise Subscription. If you do not have one, please fill out the [Visual Studio subscription enrollment form](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/master/utils/readme/Visual Studio Subscription Enrollment Form.docx) and send the email below to pwcuser@microsoft.com, with the form attached.
 
 -------------------------------------------
 Dear Sir or Madam,
@@ -44,8 +44,7 @@ If you do not already have one, you will need to [create a GitHub account](https
 
 You will require a Git command line tool to clone this repository and push it to your private GitHub. You can download the latest version from [here](https://gitforwindows.org/). During the installation you will need to go through some steps in the configuration. For most users, the following choices should be fine:
 
-![Git Setup](https://github.com/PWCNORWAY/finance-dashboard-demo/utils/readme/git_setup.png)
-https://help.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh
+![Git Setup](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/git_setup.png)
 
 When the download has finished, open Git Bash. To connect to GitHub you may either use [SSH](https://help.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh) or run the commands below, where you replace `yourusername` and `youremail@domain.com` with your GitHub username and the email address associated with your GitHub account.
 
@@ -69,7 +68,7 @@ This setup and the scripts used are designed to be executed in Cloud Shell. Ther
 
 **1. Create a new private repository on your GitHub account and name it finance-dashboard-demo. Use these settings:**
    
-![Create Private Repo](https://github.com/PWCNORWAY/finance-dashboard-demo/utils/readme/create_private_repo.png)
+![Create Private Repo](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/create_private_repo.png)
 
 **2. Clone this GitHub repository and save it on your machine. Replace `<my-username>` with your GitHub username:**
 
@@ -94,22 +93,23 @@ git push -u origin master
 
 **3. Go to portal.azure.com and log in with your PwC credentials:**
 
-![Azure login](https://github.com/PWCNORWAY/finance-dashboard-demo/utils/readme/azure_login.gif)
+![Azure login](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/azure_login.gif)
 
 **4. Open the cloud shell and select Bash:**
 
-![Launch cloud shell](https://github.com/PWCNORWAY/finance-dashboard-demo/utils/readme/launch_cloud_shell.gif)
+![Launch cloud shell](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/launch_cloud_shell.gif)
 
 **5. Upload *arm_template.json* and *db-template.bacpac*:**
 
-![Upload files](https://github.com/PWCNORWAY/finance-dashboard-demo/utils/readme/upload_files.gif)
+![Upload files](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/upload_files.gif)
 
 *arm_template.json* contains the textual representation of the Azure Data Factory you will set up.
 
 *db-template.bacpac* contains the information necessary to create an Azure SQL Database with a set of predefined tables.
+
 **6. Open the editor in Cloud Shell by clicking the {} icon and paste the contents of *azure_set_up_script.sh*:**
 
-![Paste script](https://github.com/PWCNORWAY/finance-dashboard-demo/utils/readme/paste_script.gif)
+![Paste script](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/paste_script.gif)
 
 Open *azure_set_up_script.sh* in a text editor on your machine. Copy the content and paste it into the Cloud Shell editor.
 
@@ -120,15 +120,11 @@ Open *azure_set_up_script.sh* in a text editor on your machine. Copy the content
 * `PROJECT_NAME` - Should be only alphanumeric characters. As both Azure Storage Account and Azure Key Vault names must be unique, and they are both prefixed with `PROJECT_NAME`, it is an advantage if `PROJECT_NAME` is prefixed with a value, e.g. your name, rather than just "test"
 * `DBSERVER_ADMIN_PASSWORD`
 
-**8. Use Crtl+S to save the script and name it *azure_set_up_script.sh***
+**8. Use Crtl+S to save the script and name it *azure_set_up_script.sh*. Execute the script in the Cloud Shell by running `bash azure_set_up_script.sh`:**
 
-![Save script](https://github.com/PWCNORWAY/finance-dashboard-demo/utils/readme/save_script.gif)
+![Script](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/script.gif)
 
-**9. Execute the script in the cloud shell by running `bash azure_set_up_script.sh`**
-
-![Execute script](https://github.com/PWCNORWAY/finance-dashboard-demo/utils/readme/execute_script.gif)
-
-**10. If the script executes without error, you are finished with the setup and should skip to the next part. If not, delete the resource group you have just created by executing the code below. Remember to replace the value after `PROJECT_NAME=` with your *PROJECT_NAME*: **
+**9. If the script executes without error, you are finished with the setup and should skip to the next part. If not, delete the resource group you have just created by executing the code below. Remember to replace the value after `PROJECT_NAME=` with your *PROJECT_NAME*:**
 ```
 ## Note! Deletes the resource group you have created. Only run this if you experience errors
 PROJECT_NAME=<your-project-name>
@@ -148,35 +144,29 @@ It is a bit of work to set up a local development environment for Azure Function
 
 In the repository there is a file called `.github/workflows/linux-python-functionapp-on-azure.yml`. This file contains instructions for deploying the code in the `azfunc` directory to your GitHub function whenever a change is pushed to the repository. For this to work, we need to give GitHub permission to deploy to your Function App: 
 
-1. The Azure setup script created an Azure Function App for you. Go to portal.azure.com and type `Function App` in the search bar:
+1. The Azure setup script created an Azure Function App for you. Go to portal.azure.com and type `Function App` in the search bar and select your function app, which should be called *[your-project-name]-func*:
 
-![Search for function app](https://github.com/PWCNORWAY/finance-dashboard-demo/utils/readme/search_function_app.gif)
+![Function app](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/function_app.gif)
 
-2. Select your function app, which should be called *[your-project-name]-func*
+2. In the top menu, select *Get publish profile*, open the downloaded file and copy its content:
 
-![Select function app](https://github.com/PWCNORWAY/finance-dashboard-demo/utils/readme/select_function_app.gif)
-
-3. In the top menu, select *Get publish profile*, open the downloaded file and copy its content:
-
-![Get publish profile](https://github.com/PWCNORWAY/finance-dashboard-demo/utils/readme/get_publish_profile.gif)
+![Get publish profile](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/get_publish_profile.gif)
 
 [Note! The content of this file is sensitive and, therefore, I don't show the file. You should open the file you downloaded and copy the content]
 
-4. Go to the GitHub repository *finance-dashboard-demo* on your private GitHub, and go to *Settings* &rarr; *Secrets* &rarr; *Add a new secret*
+3. Go to the GitHub repository *finance-dashboard-demo* on your private GitHub, and go to *Settings* &rarr; *Secrets* &rarr; *Add a new secret*
 
-![Add secret](https://github.com/PWCNORWAY/finance-dashboard-demo/utils/readme/add_secret.gif)
+![Add secret](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/add_secret.gif)
 
-5. Name your secret `AZURE_FUNCTIONAPP_PUBLISH_PROFILE` and paste the content of the *.PublishSettings* file in the value field.
+4. Name your secret `AZURE_FUNCTIONAPP_PUBLISH_PROFILE` and paste the content of the *.PublishSettings* file in the value field.
 
-![Set secret](https://github.com/PWCNORWAY/finance-dashboard-demo/utils/readme/set_secret.gif)
+![Set secret](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/set_secret.gif)
 
-6. Go to `.github/workflows/linux-python-functionapp-on-azure.yml` in your forked GitHub repository and click *Edit*.
+5. Go to `.github/workflows/linux-python-functionapp-on-azure.yml` in your forked GitHub repository and click *Edit*.
 
-![Set yaml](https://github.com/PWCNORWAY/finance-dashboard-demo/utils/readme/edit_yaml.gif)
+![Set yaml](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/edit_yaml.gif)
 
-7. On line 14, replace `findemo-func'` in `AZURE_FUNCTIONAPP_NAME: 'findemo-func'` with the name of your Function App.
-
-![Change name](https://github.com/PWCNORWAY/finance-dashboard-demo/utils/readme/change_name.gif)
+6. On line 14, replace `findemo-func'` in `AZURE_FUNCTIONAPP_NAME: 'findemo-func'` with the name of your Function App.
 
 ### Data Factory Configuration
 

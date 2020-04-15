@@ -17,7 +17,7 @@ To complete the setup, you will require:
 * Git for Windows (this guide assumes you have Git for Windows, but you can use any Git command line tool)
 
 #### Visual Studio Enterprise Subscription
-This guide assumes that you have a Visual Studio Enterprise Subscription. If you do not have one, please fill out the [Visual Studio subscription enrollment form](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/master/utils/readme/Visual Studio Subscription Enrollment Form.docx) and send the email below to pwcuser@microsoft.com, with the form attached.
+This guide assumes that you have a Visual Studio Enterprise Subscription. If you do not have one, please fill out the [Visual Studio subscription enrollment form](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/master/utils/readme/Visual%20Studio%20Subscription%20Enrollment%20Form.docx) and send the email below to pwcuser@microsoft.com, with the form attached.
 
 -------------------------------------------
 Dear Sir or Madam,

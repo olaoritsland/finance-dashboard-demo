@@ -15,7 +15,10 @@
 # 
 ############################# #
 
-#!/bin/bash
+#!/bin/bash -e
+
+# Find variables defined before execution of the script and store them in a temporary file
+( set -o posix ; set ) >/tmp/variables.before
 
 # Install Azure CLI (Linux-versjon)
 # curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash 
@@ -89,6 +92,18 @@ SUBSCRIPTION=$(az account list --query "[].{Name:name, ID:id}[?contains(Name,'Vi
 # Function App name must be unique
 FUNCTION_APP_NAME=$PROJECT_NAME-func
 
+# Find variables defined before execution of the script and in the script and store them in a temporary file
+( set -o posix ; set ) >/tmp/variables.after
+
+# Find variables defined only in script and write to variables.txt
+diff /tmp/variables.before /tmp/variables.after > variables.txt
+
+# Delete unwanted rows from variables.txt
+sed -i '/^\(>\)/!d' variables.txt
+
+# Remove temporary files
+rm /tmp/variables.before /tmp/variables.after
+
 ############################# #
 # Create resource group
 ############################# #
@@ -102,10 +117,18 @@ az group create \
 # Create Key Vault
 ############################# #
 
-az keyvault create\
+# Key vault may fail with a HTTP error. Most times the session must be restarted, but attempting retry first
+n=0
+retries=3
+until [ $n -ge retries ]
+do
+   az keyvault create\
    --location $RESOURCE_LOCATION\
    --name $KEY_VAULT_NAME\
-   --resource-group $RESOURCE_GROUP
+   --resource-group $RESOURCE_GROUP && break
+   n=$[$n+1]
+   sleep 15
+done
   
 ############################# #
 # Create storage account and container (Note! STORAGE_ACCOUNT_NAME must be unique )
@@ -231,6 +254,9 @@ az sql db import --resource-group $RESOURCE_GROUP\
                  --storage-key-type StorageAccessKey\
                  --storage-uri $STORAGE_URI
 
+# Get uri of Key Vault secret containing DB password
+DBSERVER_ADMIN_PASSWORD_URI=$(az keyvault secret show --name $DBSERVER_NAME --vault-name $KEY_VAULT_NAME --query id -o tsv)
+
 ############################# #
 # Deploy empty Data Factory
 ############################# #
@@ -274,26 +300,30 @@ az functionapp create --consumption-plan-location $RESOURCE_LOCATION \
                       --runtime-version 3.7\
                       --disable-app-insights true
 
+# Get the function app key
+FUNCTION_APP_KEY=$(az rest --method post --uri "/subscriptions/${SUBSCRIPTION}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.Web/sites/${FUNCTION_APP_NAME}/host/default/listKeys?api-version=2018-11-01" --query functionKeys.default -o tsv)
+
 API_KEY_24SO=d887b94b-f831-4bc9-9500-bd7a63875d9c
+SECRET_NAME_API_KEY_24SO=apikey24so
 
 az keyvault secret set\
-  --name apikey24SO\
+  --name $SECRET_NAME_API_KEY_24SO\
   --vault-name $KEY_VAULT_NAME\
   --subscription $SUBSCRIPTION\
   --value $API_KEY_24SO
 
+API_KEY_24SO_URI=$(az keyvault secret show --name $SECRET_NAME_API_KEY_24SO --vault-name $KEY_VAULT_NAME --query id -o tsv)
+
 API_PWD_24SO=@PwCBergen2020!
+SECRET_NAME_API_PWD_24SO=apipwd24so
 
 az keyvault secret set\
-  --name apipwd24SO\
+  --name $SECRET_NAME_API_PWD_24SO\
   --vault-name $KEY_VAULT_NAME\
   --subscription $SUBSCRIPTION\
   --value $API_PWD_24SO
 
-# Get function app key from portal and add it to key vault
-echo "Get your function app key from the portal and paste it here. If you would like to add your function app key later, input \"temp\" and proceed"
-read FUNCTION_APP_KEY
-#FUNCTION_APP_KEY=temp
+API_PWD_24SO_URI=$(az keyvault secret show --name $SECRET_NAME_API_PWD_24SO --vault-name $KEY_VAULT_NAME --query id -o tsv)
 
 az keyvault secret set\
   --name $FUNCTION_APP_NAME\
@@ -326,17 +356,32 @@ az deployment group create --resource-group $RESOURCE_GROUP\
       \"azure_blob_storage_connectionString\": {
           \"value\": \"${BLOB_CON}\"
       },
-      \"sqldbname\": {
+      \"sqlServerName\": {
+          \"value\": \"${DBSERVER_NAME}\"
+      },
+      \"sqlDbName\": {
           \"value\": \"${DB_NAME}\"
       },
-      \"blobaccountname\": {
-          \"value\": \"${BLOB_ACCOUNT_NAME}\"
+      \"blobAccountName\": {
+          \"value\": \"${STORAGE_ACCOUNT_NAME}\"
       },
-      \"keyvaultname\": {
+      \"keyVaultName\": {
           \"value\": \"${KEY_VAULT_NAME}\"
       },
-      \"functionappname\": {
+      \"functionAppName\": {
           \"value\": \"${FUNCTION_APP_NAME}\"
+      },
+      \"sqlDbUid\": {
+          \"value\": \"${DBSERVER_ADMIN_USER}\"
+      },
+      \"sqlDbPwdUri\": {
+          \"value\": \"${DBSERVER_ADMIN_PASSWORD_URI}\"
+      },
+      \"apiKey24SoUri\": {
+          \"value\": \"${API_KEY_24SO_URI}\"
+      },
+      \"apiPwd24SoUri\": {
+          \"value\": \"${API_PWD_24SO_URI}\"
       }
   }
 }"

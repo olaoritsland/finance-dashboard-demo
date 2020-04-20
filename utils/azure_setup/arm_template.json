@@ -12,34 +12,50 @@
             "metadata": "Secure string for 'connectionString' of 'azure_sql_server'",
             "defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=@{linkedService().datasourceprefix}.database.windows.net;Initial Catalog=@{linkedService().dbname};User ID=@{linkedService().sqlusername}"
         },
+        "azure_key_vault_properties_typeProperties_baseUrl": {
+            "type": "string",
+            "defaultValue": "https://@{linkedService().keyvaultname}.vault.azure.net/"
+        },
         "azure_blob_storage_connectionString": {
             "type": "secureString",
             "metadata": "Secure string for 'connectionString' of 'azure_blob_storage'",
             "defaultValue": "DefaultEndpointsProtocol=https;AccountName=@{linkedService().accountname};"
         },
-        "sqlservername": {
+        "sqlServerName": {
             "type": "string",
             "defaultValue": ""
         },
-        "sqldbname": {
+        "sqlDbName": {
             "type": "string",
             "defaultValue": ""
         },
-        "blobaccountname": {
+        "blobAccountName": {
             "type": "string",
             "defaultValue": ""
         },
-        "keyvaultname": {
+        "keyVaultName": {
             "type": "string",
             "defaultValue": ""
         },
-        "functionappname": {
+        "functionAppName": {
             "type": "string",
             "defaultValue": ""
         },
-        "azure_key_vault_properties_typeProperties_baseUrl": {
+        "sqlDbUid": {
             "type": "string",
-            "defaultValue": "https://@{linkedService().keyvaultname}.vault.azure.net/"
+            "defaultValue": ""
+        },
+        "sqlDbPwdUri": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "apiKey24SoUri": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "apiPwd24SoUri": {
+            "type": "string",
+            "defaultValue": ""
         }
     },
     "variables": {
@@ -55,7 +71,7 @@
                 "parameters": {
                     "keyvaultname": {
                         "type": "string",
-                        "defaultValue": "[parameters('keyvaultname')]"
+                        "defaultValue": "[parameters('keyVaultName')]"
                     }
                 },
                 "annotations": [],
@@ -73,19 +89,19 @@
                 "parameters": {
                     "datasourceprefix": {
                         "type": "string",
-                        "defaultValue": "[parameters('sqlservername')]"
+                        "defaultValue": "[parameters('sqlServerName')]"
                     },
                     "sqlusername": {
                         "type": "string",
-                        "defaultValue": "serveradmin"
+                        "defaultValue": "[parameters('sqlDbUid')]"
                     },
                     "secretname": {
                         "type": "string",
-                        "defaultValue": "[parameters('sqlservername')]"
+                        "defaultValue": "[parameters('sqlServerName')]"
                     },
                     "dbname": {
                         "type": "string",
-                        "defaultValue": "[parameters('sqldbname')]"
+                        "defaultValue": "[parameters('sqlDbName')]"
                     }
                 },
                 "annotations": [],
@@ -118,11 +134,11 @@
                 "parameters": {
                     "accountname": {
                         "type": "string",
-                        "defaultValue": "[parameters('blobaccountname')]"
+                        "defaultValue": "[parameters('blobAccountName')]"
                     },
                     "secretname": {
                         "type": "string",
-                        "defaultValue": "[parameters('blobaccountname')]"
+                        "defaultValue": "[parameters('blobAccountName')]"
                     }
                 },
                 "annotations": [],
@@ -152,11 +168,11 @@
                 "parameters": {
                     "functionappname": {
                         "type": "string",
-                        "defaultValue": "[parameters('functionappname')]"
+                        "defaultValue": "[parameters('functionAppName')]"
                     },
                     "secretname": {
                         "type": "string",
-                        "defaultValue": "[parameters('functionappname')]"
+                        "defaultValue": "[parameters('functionAppName')]"
                     }
                 },
                 "typeProperties": {
@@ -5938,7 +5954,7 @@
                         "type": "AzureFunctionActivity",
                         "dependsOn": [
                             {
-                                "activity": "Get Blob Account Key",
+                                "activity": "Get SQL DB Password",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
@@ -5972,13 +5988,15 @@
                             "method": "POST",
                             "headers": {},
                             "body": {
-                                "UID": "@{pipeline().parameters.UID}",
-                                "PWD": "@{activity('Get 24SO API Password').output.value}",
-                                "KEY": "@{activity('Get 24SO API Key').output.value}",
-                                "START_DATE": "@{pipeline().parameters.START_DATE}",
-                                "END_DATE": "@{pipeline().parameters.END_DATE}",
-                                "BLOB_ACCOUNT_NAME": "@{pipeline().parameters.BLOB_ACCOUNT_NAME}",
-                                "BLOB_ACCOUNT_KEY": "@{activity('Get Blob Account Key').output.value}}"
+                                "API_UID": "@{pipeline().parameters.API_UID}",
+                                "API_PWD": "@{activity('Get 24SO API Password').output.value}",
+                                "API_KEY": "@{activity('Get 24SO API Key').output.value}",
+                                "SEARCH_START_DATE": "@{pipeline().parameters.SEARCH_START_DATE}",
+                                "SEARCH_END_DATE": "@{pipeline().parameters.SEARCH_END_DATE}",
+                                "SQL_SERVER_NAME":"@{pipeline().parameters.SQL_SERVER_NAME}",
+                                "SQL_DB_NAME":"@{pipeline().parameters.SQL_DB_NAME}",
+                                "SQL_DB_UID":"@{pipeline().parameters.SQL_DB_UID}",
+                                "SQL_DB_PWD":"@{activity('Get SQL DB Password').output.value}"
                             }
                         },
                         "linkedServiceName": {
@@ -5987,7 +6005,7 @@
                         }
                     },
                     {
-                        "name": "Get Blob Account Key",
+                        "name": "Get SQL DB Password",
                         "type": "WebActivity",
                         "dependsOn": [],
                         "policy": {
@@ -5999,7 +6017,7 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "url": "@{pipeline().parameters.blobAccountSecretUrl}",
+                            "url": "@{concat(pipeline().parameters.sqlDbPasswordUrl, '?api-version=7.0')}",
                             "method": "GET",
                             "headers": {},
                             "authentication": {
@@ -6021,7 +6039,7 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "url": "@{pipeline().parameters.apiKeySecretUrl}",
+                            "url": "@{concat(pipeline().parameters.apiKeySecretUrl, '?api-version=7.0')}",
                             "method": "GET",
                             "headers": {},
                             "authentication": {
@@ -6043,7 +6061,7 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "url": "@{pipeline().parameters.apiPwdSecretUrl}",
+                            "url": "@{concat(pipeline().parameters.apiPwdSecretUrl, '?api-version=7.0')}",
                             "method": "GET",
                             "headers": {},
                             "authentication": {
@@ -6167,7 +6185,7 @@
                         "type": "AzureFunctionActivity",
                         "dependsOn": [
                             {
-                                "activity": "Get Blob Account Key",
+                                "activity": "Get SQL DB Password",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
@@ -6201,11 +6219,13 @@
                             "method": "POST",
                             "headers": {},
                             "body": {
-                                "UID": "@{pipeline().parameters.UID}",
-                                "PWD": "@{activity('Get 24SO API Password').output.value}",
-                                "KEY": "@{activity('Get 24SO API Key').output.value}",
-                                "BLOB_ACCOUNT_NAME": "@{pipeline().parameters.BLOB_ACCOUNT_NAME}",
-                                "BLOB_ACCOUNT_KEY": "@{activity('Get Blob Account Key').output.value}}"
+                                "API_UID": "@{pipeline().parameters.API_UID}",
+                                "API_PWD": "@{activity('Get 24SO API Password').output.value}",
+                                "API_KEY": "@{activity('Get 24SO API Key').output.value}",
+                                "SQL_SERVER_NAME":"@{pipeline().parameters.SQL_SERVER_NAME}",
+                                "SQL_DB_NAME":"@{pipeline().parameters.SQL_DB_NAME}",
+                                "SQL_DB_UID":"@{pipeline().parameters.SQL_DB_UID}",
+                                "SQL_DB_PWD":"@{activity('Get SQL DB Password').output.value}"
                             }
                         },
                         "linkedServiceName": {
@@ -6215,21 +6235,29 @@
                     }
                 ],
                 "parameters": {
-                    "UID": {
+                    "API_UID": {
                         "type": "string",
                         "defaultValue": "oystein.hellenes.grov@pwc.com"
                     },
-                    "START_DATE": {
+                    "SEARCH_START_DATE": {
                         "type": "string",
                         "defaultValue": "1900-01-01"
                     },
-                    "END_DATE": {
+                    "SEARCH_END_DATE": {
                         "type": "string",
                         "defaultValue": "2021-01-31"
                     },
-                    "BLOB_ACCOUNT_NAME": {
+                    "SQL_SERVER_NAME": {
                         "type": "string",
-                        "defaultValue": "findemostorage1"
+                        "defaultValue": "[parameters('sqlServerName')]"
+                    },
+                    "SQL_DB_NAME": {
+                        "type": "string",
+                        "defaultValue": "[parameters('sqlDbName')]"
+                    },
+                    "SQL_DB_UID": {
+                        "type": "string",
+                        "defaultValue": "[parameters('sqlDbUid')]"
                     },
                     "transactionTableName": {
                         "type": "string",
@@ -6248,30 +6276,24 @@
                         "defaultValue": "get_transactions"
                     },
                     "transactionTableSchema": {
-                        "type": "string"
+                        "type": "string",
+                        "defaultValue": "dbo"
                     },
                     "accountTableSchema": {
-                        "type": "string"
-                    },
-                    "blobAccountSecretUrl": {
-                        "type": "string"
+                        "type": "string",
+                        "defaultValue": "dbo"
                     },
                     "apiKeySecretUrl": {
-                        "type": "string"
+                        "type": "string",
+                        "defaultValue": "[parameters('apiKey24SoUri')]"
                     },
                     "apiPwdSecretUrl": {
-                        "type": "string"
-                    }
-                },
-                "variables": {
-                    "BLOB_ACCOUNT_KEY": {
-                        "type": "String"
+                        "type": "string",
+                        "defaultValue": "[parameters('apiPwd24SoUri')]"
                     },
-                    "PWD": {
-                        "type": "String"
-                    },
-                    "API_KEY": {
-                        "type": "String"
+                    "sqlDbPasswordUrl": {
+                        "type": "string",
+                        "defaultValue": "[parameters('sqlDbPwdUri')]"
                     }
                 },
                 "folder": {

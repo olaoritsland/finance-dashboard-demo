@@ -4,6 +4,9 @@ import numpy as np
 import re
 import azure.functions as func
 import logging
+import urllib
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
 
 def set_param(req, alias):
     par = req.params.get(alias)
@@ -62,3 +65,35 @@ def convert_types(df, table_schema):
 def camel_to_uppercase_snake(name):
   name = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
   return re.sub('([a-z0-9])([A-Z])', r'\1_\2', name).upper()
+
+def create_sqlalchemy_engine(server, database, db_username, db_password, driver='{ODBC Driver 17 for SQL Server}', port='1433'):
+    server_string = server + '.database.windows.net,' + port
+    params = urllib.parse.quote_plus \
+    (r'Driver={};Server=tcp:{};Database={};Uid={};Pwd={};Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;'
+    .format(driver, server_string, database, db_username, db_password))
+    conn_str = 'mssql+pyodbc:///?odbc_connect={}'.format(params)
+    engine = create_engine(conn_str,echo=True, fast_executemany=True)
+    return engine
+
+def truncate_and_write_table(table_name, engine, df=None):
+    Session = sessionmaker(engine)
+    session = Session()
+
+    select_query = 'SELECT COUNT(*) FROM {}'.format(table_name)
+    truncate_query = 'TRUNCATE TABLE {}'.format(table_name)
+
+    pre_count = session.execute(select_query).scalar()
+    session.execute(truncate_query)
+    session.commit()
+    assert session.execute(select_query).scalar() == 0
+    logging.info('Deleted all {} rows from {}'.format(pre_count, table_name))
+
+    if df is not None:
+        df.to_sql(table_name, con = engine, if_exists = 'append', index = False)
+
+    post_count = session.execute(select_query).scalar()
+    session.close()
+    
+    logging.info('{} rows written to {}'.format(post_count, table_name))
+
+    return post_count

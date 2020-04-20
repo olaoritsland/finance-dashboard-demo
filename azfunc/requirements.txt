@@ -2,4 +2,5 @@ azure-functions
 pandas
 numpy
 git+git://github.com/loyning/python-24so#egg=tfsoffice
-azure-storage
+sqlalchemy
+pyodbc

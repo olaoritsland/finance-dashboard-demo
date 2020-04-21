@@ -20,6 +20,20 @@
 # Find variables defined before execution of the script and store them in a temporary file
 ( set -o posix ; set ) >/tmp/variables.before
 
+# Define function to store variables defined in script
+function script_variables()
+{
+# Find variables defined before execution of the script and in the script and store them in a temporary file
+( set -o posix ; set ) >/tmp/variables.after
+
+# Find variables defined only in script and write to variables.txt
+diff /tmp/variables.before /tmp/variables.after > variables.txt
+
+# Delete unwanted rows from variables.txt and clearn output
+sed -i '/^\(>\)/!d' variables.txt
+sed -i 's/^..//' variables.txt
+}
+
 # Install Azure CLI (Linux-versjon)
 # curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash 
 
@@ -31,15 +45,16 @@
 echo "Input your desired project name. All characters must be alphanumeric:"
 read PROJECT_NAME
 
-if [[ "$PROJECT_NAME" =~ [^a-zA-Z0-9] ]]; then
-  echo "Invalid project name. Remember that all characters must be alphanumeric"
-  echo "Input your desired project name:"
-  read PROJECT_NAME
+if [[ "$PROJECT_NAME" =~ [^a-zA-Z0-9] ]]
+  then
+    while [[ "$PROJECT_NAME" =~ [^a-zA-Z0-9] ]]
+      do
+        echo "Invalid project name. Remember that all characters must be alphanumeric"
+        echo "Input your desired project name:"
+        read PROJECT_NAME
+      done
+  
 fi
-
-# Database server password. Generate password from https://passwordsgenerator.net/
-echo "Input your desired database server password:"
-read DBSERVER_ADMIN_PASSWORD
 
 #PROJECT_NAME=
 #DBSERVER_ADMIN_PASSWORD=
@@ -50,14 +65,15 @@ RESOURCE_LOCATION=northeurope
 ## Storage Account
 STORAGE_ACCOUNT_NAME=${PROJECT_NAME}storage
 
-# Storage account name must be unique. Append 1's until it is
+# Storage account name must be unique
 NAME_AVAILABLE=$(az storage account check-name --name ${STORAGE_ACCOUNT_NAME} --query nameAvailable -o tsv)
 
 if [ $NAME_AVAILABLE = 'false' ]
   then
     while [ $NAME_AVAILABLE = 'false' ]
       do
-        STORAGE_ACCOUNT_NAME=${STORAGE_ACCOUNT_NAME}1
+        echo "Storage account name $STORAGE_ACCOUNT_NAME is taken, please choose a different name:"
+        read STORAGE_ACCOUNT_NAME
         NAME_AVAILABLE=$(az storage account check-name --name ${STORAGE_ACCOUNT_NAME} --query nameAvailable -o tsv)
       done
 fi
@@ -74,6 +90,13 @@ MANUAL_INPUT_CONTAINER=data-factory-manual-input
 
 ## Database
 DBSERVER_ADMIN_USER=serveradmin
+
+# Database server password.
+echo "Input your desired database server password"
+echo "The password cannot contain the username, ${DBSERVER_ADMIN_USER}, and must contain at least three of the following: an uppercase letter, a lowercase letter, a number, a special character like !, $, % or #"
+echo "No data validation is implemented, so take care when selecting your password"
+read DBSERVER_ADMIN_PASSWORD
+
 DBSERVER_NAME=$PROJECT_NAME-sqlserver
 DB_NAME=$PROJECT_NAME-db
 DB_EDITION=Basic #Allowed values include: Basic, Standard, Premium, GeneralPurpose, BusinessCritical, Hyperscale
@@ -92,17 +115,8 @@ SUBSCRIPTION=$(az account list --query "[].{Name:name, ID:id}[?contains(Name,'Vi
 # Function App name must be unique
 FUNCTION_APP_NAME=$PROJECT_NAME-func
 
-# Find variables defined before execution of the script and in the script and store them in a temporary file
-( set -o posix ; set ) >/tmp/variables.after
-
-# Find variables defined only in script and write to variables.txt
-diff /tmp/variables.before /tmp/variables.after > variables.txt
-
-# Delete unwanted rows from variables.txt
-sed -i '/^\(>\)/!d' variables.txt
-
-# Remove temporary files
-rm /tmp/variables.before /tmp/variables.after
+# Execute script_variables each time a new variable is defined
+script_variables
 
 ############################# #
 # Create resource group
@@ -120,7 +134,7 @@ az group create \
 # Key vault may fail with a HTTP error. Most times the session must be restarted, but attempting retry first
 n=0
 retries=3
-until [ $n -ge retries ]
+until [ $n -ge $  retries ]
 do
    az keyvault create\
    --location $RESOURCE_LOCATION\
@@ -143,6 +157,8 @@ az storage account create \
   --subscription $SUBSCRIPTION
 
 STORAGE_ACCOUNT_KEY1=$(az storage account keys list -g $RESOURCE_GROUP -n $STORAGE_ACCOUNT_NAME --query [0].value -o tsv)
+
+script_variables
 
 # Create secret to store storage account key
 az keyvault secret set\
@@ -187,6 +203,8 @@ SOURCE_CONTAINER=data-factory-manual-input
 DF_SHARED_ACCESS_KEY="se=2025-01-01&sp=rl&sv=2018-11-09&sr=c&sig=KALHqnqoykOnMk0FFFZS%2B1jMutBEP5z7WgGzr9aO3X8%3D"
 BACPAC_SHARED_ACCESS_KEY="se=2025-01-01&sp=rl&sv=2018-11-09&sr=c&sig=m6ZcmWUfCg/Jj3RizJtl0dMExNBWuw10Iu/P3m9yWHU%3D"
 
+script_variables
+
 # Upload bacpac file to blob
 #az storage blob upload --file $BACPAC_NAME\
 #                       --name $BACPAC_NAME\
@@ -215,12 +233,25 @@ az storage blob copy start --source-sas $BACPAC_SHARED_ACCESS_KEY\
 ############################# #
 
 # Create SQL Server
-az sql server create --admin-password $DBSERVER_ADMIN_PASSWORD\
+function create_sql_server()
+{
+  az sql server create --admin-password $DBSERVER_ADMIN_PASSWORD\
                      --admin-user $DBSERVER_ADMIN_USER\
                      --name $DBSERVER_NAME\
                      --resource-group $RESOURCE_GROUP\
                      --location $RESOURCE_LOCATION\
                      --subscription $SUBSCRIPTION
+}
+
+
+
+{ # try
+    create_sql_server
+} || { # catch
+    DBSERVER_ADMIN_PASSWORD=@PwCBergen2020!
+    create_sql_server
+    echo "Your password has been changed to @PwCBergen2020!"
+}
 
 # Create secret to store database server admin password
 az keyvault secret set\
@@ -257,6 +288,8 @@ az sql db import --resource-group $RESOURCE_GROUP\
 # Get uri of Key Vault secret containing DB password
 DBSERVER_ADMIN_PASSWORD_URI=$(az keyvault secret show --name $DBSERVER_NAME --vault-name $KEY_VAULT_NAME --query id -o tsv)
 
+script_variables
+
 ############################# #
 # Deploy empty Data Factory
 ############################# #
@@ -269,6 +302,8 @@ az resource create --resource-group $RESOURCE_GROUP\
 
 # Get Data Factory principal ID and allow Data Factory to get and list secrets in Azure Key Vault
 DATA_FACTORY_PRINCIPAL_ID=$(az resource list -n $DATA_FACTORY_NAME -g $RESOURCE_GROUP --resource-type "Microsoft.DataFactory/factories" --query [0].identity.principalId -o tsv)
+
+script_variables
 
 #az group deployment create --resource-group $RESOURCE_GROUP\
                            #--mode Incremental\
@@ -306,6 +341,8 @@ FUNCTION_APP_KEY=$(az rest --method post --uri "/subscriptions/${SUBSCRIPTION}/r
 API_KEY_24SO=d887b94b-f831-4bc9-9500-bd7a63875d9c
 SECRET_NAME_API_KEY_24SO=apikey24so
 
+script_variables
+
 az keyvault secret set\
   --name $SECRET_NAME_API_KEY_24SO\
   --vault-name $KEY_VAULT_NAME\
@@ -317,6 +354,8 @@ API_KEY_24SO_URI=$(az keyvault secret show --name $SECRET_NAME_API_KEY_24SO --va
 API_PWD_24SO=@PwCBergen2020!
 SECRET_NAME_API_PWD_24SO=apipwd24so
 
+script_variables
+
 az keyvault secret set\
   --name $SECRET_NAME_API_PWD_24SO\
   --vault-name $KEY_VAULT_NAME\
@@ -324,6 +363,8 @@ az keyvault secret set\
   --value $API_PWD_24SO
 
 API_PWD_24SO_URI=$(az keyvault secret show --name $SECRET_NAME_API_PWD_24SO --vault-name $KEY_VAULT_NAME --query id -o tsv)
+
+script_variables
 
 az keyvault secret set\
   --name $FUNCTION_APP_NAME\
@@ -335,6 +376,7 @@ SQL_CON='Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Sourc
 BLOB_CON='DefaultEndpointsProtocol=https;AccountName=@{linkedService().accountname};'
 KV_URL='https://@{linkedService().keyvaultname}.vault.azure.net/'
 
+script_variables
 
 az deployment group create --resource-group $RESOURCE_GROUP\
                          --mode Incremental\
@@ -385,3 +427,7 @@ az deployment group create --resource-group $RESOURCE_GROUP\
       }
   }
 }"
+
+# Remove temporary files
+rm /tmp/variables.before /tmp/variables.after
+

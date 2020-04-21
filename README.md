@@ -6,14 +6,14 @@ This project enables you to quickly set up Azure resources necessary to integrat
 
 These instructions will enable you to set up the resources you require in your own Azure subscription. The instructions are designed for PwC Norway users with a Visual Studio Enterprise Subscription with monthly free credits of $150. Most configurations are set up in order to be as cheap as possible and with moderate use it should be possible to use less than your free credits. However, please monitor your costs to avoid any surprises.
 
-Note that this does not create a production-ready solution! Most settings are optimized for cheapness, not robustness or security. However, only a few changes in the configurations are necessary to create  a production-ready solution.
+Note that this does not create a production-ready solution! Most settings are optimized for cheapness, not robustness or security. However, only a few changes in the configurations are necessary to create a production-ready solution.
 
 ### Prerequisites
 
 To complete the setup, you will require:
 
 * An Azure account linked to a Visual Studio Enterprise Subscription
-* A private GitHub user |ccount
+* A private GitHub account
 * Git for Windows (this guide assumes you have Git for Windows, but you can use any Git command line tool)
 
 #### Visual Studio Enterprise Subscription
@@ -64,7 +64,7 @@ git config --global user.email "youremail@domain.com"
 
 ### Setup
 
-This setup and the scripts used are designed to be executed in Cloud Shell. Therefore, this guide assumes that you work in Cloud Shell. If you prefer to develop locally instead, you may need to make some changes.
+This setup and the scripts used are designed to be executed in Cloud Shell. Therefore, this guide assumes that you work in Cloud Shell. If you prefer to develop locally instead, you will need to make some changes that are not covered here.
 
 **1. Create a new private repository on your GitHub account and name it finance-dashboard-demo. Use these settings:**
    
@@ -72,7 +72,7 @@ This setup and the scripts used are designed to be executed in Cloud Shell. Ther
 
 **2. Clone this GitHub repository and save it on your machine. Replace `<my-username>` with your GitHub username:**
 
-Navigate to the location that you want to save the local version of the repository and run the commands below
+Open Git Bash and navigate to the location that you want to save the local version of the repository and run the commands below:
 
 ```
 # Clone this repository
@@ -81,7 +81,7 @@ git clone "https://github.com/PWCNORWAY/finance-dashboard-demo.git"
 # Move into the repository
 cd finance-dashboard-demo/
 
-# Remove origin and your private repo as origin
+# Remove origin and set your private repo as origin
 git remote rm origin
 git remote add origin "https://github.com/<my-username>/finance-dashboard-demo.git"
 
@@ -97,72 +97,103 @@ git push -u origin master
 
 ![Launch cloud shell](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/launch_cloud_shell.gif)
 
-**5. Upload *arm_template.json* and *db-template.bacpac*:**
+[Note: You must have a storage account associated with your Cloud Shell. If you are promped to create a storage account, select OK and proceeed. The first time you open the Cloud Shell you will be prompted to choose between Bash and PowerShell and your should select Bash for this guide.]
+
+**5. Upload *arm_template.json* from your local repository:**
 
 ![Upload files](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/upload_files.gif)
 
 *arm_template.json* contains the textual representation of the Azure Data Factory you will set up.
 
-*db-template.bacpac* contains the information necessary to create an Azure SQL Database with a set of predefined tables.
-
 **6. Open the editor in Cloud Shell by clicking the {} icon and paste the contents of *azure_set_up_script.sh* from your local repository**
 
 [Note: It may seem unnecessary to copy the content, paste it and save it to file instead of uploading the file to clouddrive and editing it. However, this is an easy way to avoid that the shell script fails because of [Windows-style line endings](https://stackoverflow.com/questions/426397/do-line-endings-differ-between-windows-and-linux)].
 
-**7. You should edit the following variable names in the script:**
-
-* `PROJECT_NAME` - Should be only alphanumeric characters. As both Azure Storage Account and Azure Key Vault names must be unique, and they are both prefixed with `PROJECT_NAME`, it is an advantage if `PROJECT_NAME` is prefixed with a value, e.g. your name, rather than just "test"
-* `DBSERVER_ADMIN_PASSWORD`
-
-**8. Use Crtl+S to save the script and name it *azure_set_up_script.sh*. Execute the script in the Cloud Shell by running `bash azure_set_up_script.sh`:**
+**7. Use Crtl+S to save the script and name it *azure_set_up_script.sh*. Execute the script in the Cloud Shell by running `bash azure_set_up_script.sh`:**
 
 ![Script](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/script.gif)
 
-**9. If the script executes without error, you are finished with the setup and should skip to the next part. If not, delete the resource group you have just created by executing the code below. Remember to replace the value after `PROJECT_NAME=` with your *PROJECT_NAME*:**
-```
-## Note! Deletes the resource group you have created. Only run this if you experience errors
-PROJECT_NAME=<your-project-name>
-RESOURCE_GROUP=$PROJECT_NAME-RG
-SUBSCRIPTION=$(az account list --query "[].{Name:name, ID:id}[?contains(Name,'Visual Studio')].ID" -o tsv)
+**8. The script will prompt you to set the following variables:**
 
-# Delete all assets
-az group delete --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION
-```
-After deleting the resource group, restart the Cloud Shell and try to run the code statement by statement by copying and pasting into Cloud Shell. If there are errors, look at the error messages and see if you can figure out what happened. Remember that some resources require names to be in a certain format or be unique. If you cannot find the reason for your error, do not hesitate to contact me (oystein.hellenes.grov@pwc.com)
+* `PROJECT_NAME` - Should be only alphanumeric characters. As both Azure Storage Account and Azure Key Vault names must be unique, and they are both prefixed with `PROJECT_NAME`, it is an advantage if `PROJECT_NAME` is prefixed with a value, e.g. your name, rather than just "test"
+* `DBSERVER_ADMIN_PASSWORD` - Must adhere to SQL Server password requirements. The password should have at least eight characters, not contain the username and contain at least three of these four characters:
+
+   * A lowercase letter
+
+   * An uppercase letter
+
+   * A number
+
+   * A special character like !, $, % or #
+
+[Note: If the sql server setup does not accept your password, it will automatically be changed to @PwCBergen2020!]
+
+**9. If the script executes without error, you are finished with this part of the setup and should skip to the next part. If not, consider the advice below:**
+
+Check the command line output to see which operation failed. Key Vault creation sometimes fails with a HTTP error. This is normally resolved by restarting the Cloud Shell and retrying. SQL Server creation may fail if it is not possible to create a server in the region at the given time. This can normally be fixed by switching to a different region, like for instance setting `RESOURCE_LOCATION=westus`.
+
+When you have figured out the reason for the error, run the code statement-by-statement from where the script failed. To make this easier, the variables that were stored when execution failed is available in the file *variables.txt*, and you can copy these by opening the file in the Cloud Editor. If you cannot find the reason for your error and restarting the Cloud Shell does not fix your issue, do not hesitate to contact me (oystein.hellenes.grov@pwc.com).
 
 ### Azure Functions Configuration
 
-As part of the Azure setup script you set up a Python 3.7 Function App. In order for this Function App to be... well... functional, you will need to deploy some code to it.
+As part of the Azure setup script you set up a Python 3.7 Function App. In order for this Function App to be callable, you will need to deploy some code to it.
 
-It is a bit of work to set up a local development environment for Azure Function, as you can see from [this quickstart](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-azure-function-azure-cli?tabs=bash%2Cbrowser&pivots=programming-language-python). If you want to develop Azure Functions using Python yourself, you will need to go through the setup process. However, if you just want to deploy the Azure Function from this repository to your own resource group it's much simpler!
+A few installations are necessary to set up a local development environment for Azure Function, as you can see from [this quickstart](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-azure-function-azure-cli?tabs=bash%2Cbrowser&pivots=programming-language-python). If you want to develop Azure Functions using Python yourself, you will need to go through the setup process. However, if you just want to deploy the Azure Function from this repository to your own resource group it's much simpler!
 
-In the repository there is a file called `.github/workflows/linux-python-functionapp-on-azure.yml`. This file contains instructions for deploying the code in the `azfunc` directory to your GitHub function whenever a change is pushed to the repository. For this to work, we need to give GitHub permission to deploy to your Function App: 
+In the repository there is a file called `.github/workflows/linux-python-functionapp-on-azure.yml`. This file contains instructions for deploying the code in the `azfunc` directory to your Azure Function whenever a change is pushed to the repository. For this to work, we need to give GitHub permission to deploy to your Function App: 
 
-1. The Azure setup script created an Azure Function App for you. Go to portal.azure.com and type `Function App` in the search bar and select your function app, which should be called *[your-project-name]-func*
+**1. The Azure setup script created an Azure Function App for you. Go to portal.azure.com and type *Function App* in the search bar and select your function app, which should be called *[your-project-name]-func***
 
-2. In the top menu, select *Get publish profile*, open the downloaded file and copy its content:
+**2. In the top menu, select *Get publish profile*, open the downloaded file and copy its content:**
 
 ![Get publish profile](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/get_publish_profile.gif)
 
 [Note! The content of this file is sensitive and, therefore, I don't show the file. You should open the file you downloaded and copy the content]
 
-3. Go to the GitHub repository *finance-dashboard-demo* on your private GitHub, and go to *Settings* &rarr; *Secrets* &rarr; *Add a new secret*
+**3. Go to the GitHub repository *finance-dashboard-demo* on your private GitHub, and go to *Settings* &rarr; *Secrets* &rarr; *Add a new secret***
 
 ![Add secret](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/add_secret.gif)
 
-4. Name your secret `AZURE_FUNCTIONAPP_PUBLISH_PROFILE` and paste the content of the *.PublishSettings* file in the value field.
+**4. Name your secret `AZURE_FUNCTIONAPP_PUBLISH_PROFILE` and paste the content of the *.PublishSettings* file in the value field.**
 
 ![Set secret](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/set_secret.gif)
 
-5. Go to `.github/workflows/linux-python-functionapp-on-azure.yml` in your forked GitHub repository and click *Edit*.
+**5. Go to `.github/workflows/linux-python-functionapp-on-azure.yml` in your forked GitHub repository and click *Edit*.**
 
 ![Set yaml](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/edit_yaml.gif)
 
-6. On line 14, replace `findemo-func'` in `AZURE_FUNCTIONAPP_NAME: 'findemo-func'` with the name of your Function App.
+**6. On line 14, replace `findemo-func'` in `AZURE_FUNCTIONAPP_NAME: 'findemo-func'` with the name of your Function App.**
+
+**7. When you have completed the steps below, your changes are pushed to the remote repository and the GitHub Action which publishes your Azure Function is prompted. It will be approximately five minutes after completion of the Github Action until the functions are available.**
+
+**8. Go to portal.azure.com and type *Function App* in the search bar and select your function app. Wait and refresh until the functions *get_account_list* and *get_transactions* appear under *Functions (Read Only)* in the left menu**
 
 ### Data Factory Configuration
 
+Once you have Azure Function set up, the Data Factory is available for use. You may now trigger the full refresh orchestration pipelines to populate your Azure SQL Database.
+You will trigger the main orchestration pipeline, which is baded on data from 24SevenOffice test clients and the demo orchestration pipeline which is based on generated data stored in flat files.
+
+**1. Go to adf.azure.com**
+
+**2. Select your Data Factory**
+
+![Select Data Factory](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/select_adf.png)
+
+**3. Go to *Pipelines* &rarr; *Trigger Orchestration* &rarr; *ORC_FULL_REFRESH* and select *Add trigger* &rarr; *Trigger now*. Keep the default parameter values and select *OK***
+
+![Trigger pipeline](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/trigger_pipeline.gif)
+
+**4. Repeat the step above for the demo version of the pipeline by selecting *Pipelines* &rarr; *Demo* &rarr; *DEMO_ORC_FULL_REFRESH* and selecting *Add trigger* &rarr; *Trigger now***
+
+**5. Select the monitor icon in the left tab to monitor the execution of your pipeline runs**
+
+![Monitor](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/monitor.png)
+
+Once the orchestration has completed, the tables are available for use. If you would like to, you may inspect and query them in a database tool, like for instance [SQL Server Management Studio](https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms?view=sql-server-ver15).
+
 ### PowerBI Configuration
+
+We will now connect Power BI to the SQL Database you have set up. We will connect to tables in the demo schema as the data stored in these tables looks more real than the data from the 24SevenOffice test clients.
 
 ## Contributing
 

@@ -99,7 +99,7 @@ def get_all_transactions(username:str, password:str, apikey:str, table_schema:di
     trans_df = pd.json_normalize(output_dict['results'])
     
     if dimension_data:
-        trans_df = trans_df.merge(dims_df, how = 'left', left_on = ['ClientName', 'Id'], right_index = True)
+        trans_df = trans_df.merge(dims_df, how = 'left', left_on = ['Id', 'ClientName'], right_index = True)
                     
     trans_df = trans_df.drop(['Dimensions', 'Dimensions.Dimension'], axis = 1, errors = 'ignore')
 

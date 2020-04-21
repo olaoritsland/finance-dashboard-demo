@@ -40,7 +40,7 @@ def retry_get(username, password, apikey, identity,  api_operation, retries=3, *
                 api = login_and_set_identity(username, password, apikey, identity)
                 client_dict = api_operation(api, **kwargs)
             except:
-                logging.info("HTTP request attempt {} failed")
+                logging.info("HTTP request attempt {} failed".format(index))
                 if index+1!=retries:
                     logging.info("Retrying...")
                     continue

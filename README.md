@@ -13,7 +13,7 @@ Note that this does not create a production-ready solution! Most settings are op
 To complete the setup, you will require:
 
 * An Azure account linked to a Visual Studio Enterprise Subscription
-* A private GitHub account
+* A private GitHub user |ccount
 * Git for Windows (this guide assumes you have Git for Windows, but you can use any Git command line tool)
 
 #### Visual Studio Enterprise Subscription

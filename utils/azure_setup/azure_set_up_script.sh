@@ -15,7 +15,8 @@
 # 
 ############################# #
 
-#!/bin/bash -e
+#!/bin/bash
+set -e
 
 # Find variables defined before execution of the script and store them in a temporary file
 ( set -o posix ; set ) >/tmp/variables.before
@@ -29,7 +30,7 @@ function script_variables()
 # Find variables defined only in script and write to variables.txt
 diff /tmp/variables.before /tmp/variables.after > variables.txt
 
-# Delete unwanted rows from variables.txt and clearn output
+# Delete unwanted rows from variables.txt and clean output
 sed -i '/^\(>\)/!d' variables.txt
 sed -i 's/^..//' variables.txt
 }
@@ -45,38 +46,39 @@ sed -i 's/^..//' variables.txt
 echo "Input your desired project name. All characters must be alphanumeric:"
 read PROJECT_NAME
 
-if [[ "$PROJECT_NAME" =~ [^a-zA-Z0-9] ]]
-  then
-    while [[ "$PROJECT_NAME" =~ [^a-zA-Z0-9] ]]
-      do
-        echo "Invalid project name. Remember that all characters must be alphanumeric"
-        echo "Input your desired project name:"
-        read PROJECT_NAME
-      done
-  
-fi
+while [[ "$PROJECT_NAME" =~ [^a-zA-Z0-9] ]]
+  do
+    echo "Invalid project name. Remember that all characters must be alphanumeric"
+    echo "Input your desired project name:"
+    read PROJECT_NAME
+  done
+
+echo "Input your public ip address, which you can find på googling \"my ip\""
+read MY_IP_ADDRESS
+while ! [[ $MY_IP_ADDRESS =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]
+  do
+    echo "Invalid IP address. Please enter your IP address:"
+    read MY_IP_ADDRESS
+  done
 
 #PROJECT_NAME=
 #DBSERVER_ADMIN_PASSWORD=
 
-RESOURCE_GROUP=$PROJECT_NAME-RG
+RESOURCE_GROUP=rg-$PROJECT_NAME
 RESOURCE_LOCATION=northeurope
 
 ## Storage Account
-STORAGE_ACCOUNT_NAME=${PROJECT_NAME}storage
+STORAGE_ACCOUNT_NAME=st${PROJECT_NAME}
 
 # Storage account name must be unique
 NAME_AVAILABLE=$(az storage account check-name --name ${STORAGE_ACCOUNT_NAME} --query nameAvailable -o tsv)
 
-if [ $NAME_AVAILABLE = 'false' ]
-  then
-    while [ $NAME_AVAILABLE = 'false' ]
-      do
-        echo "Storage account name $STORAGE_ACCOUNT_NAME is taken, please choose a different name:"
-        read STORAGE_ACCOUNT_NAME
-        NAME_AVAILABLE=$(az storage account check-name --name ${STORAGE_ACCOUNT_NAME} --query nameAvailable -o tsv)
-      done
-fi
+while [ $NAME_AVAILABLE = 'false' ]
+  do
+    echo "Storage account name $STORAGE_ACCOUNT_NAME is taken, please choose a different name:"
+    read STORAGE_ACCOUNT_NAME
+    NAME_AVAILABLE=$(az storage account check-name --name ${STORAGE_ACCOUNT_NAME} --query nameAvailable -o tsv)
+  done
 
 STORAGE_CONTAINER=data-factory-staging
 STORAGE_SKU=Standard_LRS
@@ -97,26 +99,26 @@ echo "The password cannot contain the username, ${DBSERVER_ADMIN_USER}, and must
 echo "No data validation is implemented, so take care when selecting your password"
 read DBSERVER_ADMIN_PASSWORD
 
-DBSERVER_NAME=$PROJECT_NAME-sqlserver
-DB_NAME=$PROJECT_NAME-db
+DBSERVER_NAME=sql-$PROJECT_NAME
+DB_NAME=sqldb-$PROJECT_NAME
 DB_EDITION=Basic #Allowed values include: Basic, Standard, Premium, GeneralPurpose, BusinessCritical, Hyperscale
 MAX_SIZE=1GB
 
 ### Key Vault
 # Key Vault name must be unique
-KEY_VAULT_NAME=$PROJECT_NAME-KV
+KEY_VAULT_NAME=kv-$PROJECT_NAME
 ARM_TEMPLATE_FILE=arm_template.json
-DATA_FACTORY_NAME=$PROJECT_NAME-adf-dev
+DATA_FACTORY_NAME=adf-$PROJECT_NAME-dev
 
 # Find Visual Studio Enterprise Subscription, otherwise find your
 SUBSCRIPTION=$(az account list --query "[].{Name:name, ID:id}[?contains(Name,'Visual Studio')].ID" -o tsv)
 
 ## Function App
 # Function App name must be unique
-FUNCTION_APP_NAME=$PROJECT_NAME-func
+FUNCTION_APP_NAME=func-$PROJECT_NAME
 
 # Execute script_variables each time a new variable is defined
-script_variables
+script_variables || true
 
 ############################# #
 # Create resource group
@@ -134,7 +136,7 @@ az group create \
 # Key vault may fail with a HTTP error. Most times the session must be restarted, but attempting retry first
 n=0
 retries=3
-until [ $n -ge $  retries ]
+until [ $n -ge $retries ]
 do
    az keyvault create\
    --location $RESOURCE_LOCATION\
@@ -158,7 +160,7 @@ az storage account create \
 
 STORAGE_ACCOUNT_KEY1=$(az storage account keys list -g $RESOURCE_GROUP -n $STORAGE_ACCOUNT_NAME --query [0].value -o tsv)
 
-script_variables
+script_variables || true
 
 # Create secret to store storage account key
 az keyvault secret set\
@@ -203,7 +205,7 @@ SOURCE_CONTAINER=data-factory-manual-input
 DF_SHARED_ACCESS_KEY="se=2025-01-01&sp=rl&sv=2018-11-09&sr=c&sig=KALHqnqoykOnMk0FFFZS%2B1jMutBEP5z7WgGzr9aO3X8%3D"
 BACPAC_SHARED_ACCESS_KEY="se=2025-01-01&sp=rl&sv=2018-11-09&sr=c&sig=m6ZcmWUfCg/Jj3RizJtl0dMExNBWuw10Iu/P3m9yWHU%3D"
 
-script_variables
+script_variables || true
 
 # Upload bacpac file to blob
 #az storage blob upload --file $BACPAC_NAME\
@@ -275,6 +277,12 @@ az sql server firewall-rule create --resource-group $RESOURCE_GROUP\
                                    --start-ip-address 0.0.0.0\
                                    --end-ip-address 0.0.0.0
 
+az sql server firewall-rule create --resource-group $RESOURCE_GROUP\
+                                   --server $DBSERVER_NAME\
+                                   --name MyClientIP\
+                                   --start-ip-address $MY_IP_ADDRESS\
+                                   --end-ip-address $MY_IP_ADDRESS
+
 # Populate database with data/schema from bacpac file stored in blob
 az sql db import --resource-group $RESOURCE_GROUP\
                  --server $DBSERVER_NAME\
@@ -288,7 +296,7 @@ az sql db import --resource-group $RESOURCE_GROUP\
 # Get uri of Key Vault secret containing DB password
 DBSERVER_ADMIN_PASSWORD_URI=$(az keyvault secret show --name $DBSERVER_NAME --vault-name $KEY_VAULT_NAME --query id -o tsv)
 
-script_variables
+script_variables || true
 
 ############################# #
 # Deploy empty Data Factory
@@ -303,7 +311,7 @@ az resource create --resource-group $RESOURCE_GROUP\
 # Get Data Factory principal ID and allow Data Factory to get and list secrets in Azure Key Vault
 DATA_FACTORY_PRINCIPAL_ID=$(az resource list -n $DATA_FACTORY_NAME -g $RESOURCE_GROUP --resource-type "Microsoft.DataFactory/factories" --query [0].identity.principalId -o tsv)
 
-script_variables
+script_variables || true
 
 #az group deployment create --resource-group $RESOURCE_GROUP\
                            #--mode Incremental\
@@ -341,7 +349,7 @@ FUNCTION_APP_KEY=$(az rest --method post --uri "/subscriptions/${SUBSCRIPTION}/r
 API_KEY_24SO=d887b94b-f831-4bc9-9500-bd7a63875d9c
 SECRET_NAME_API_KEY_24SO=apikey24so
 
-script_variables
+script_variables || true
 
 az keyvault secret set\
   --name $SECRET_NAME_API_KEY_24SO\
@@ -354,7 +362,7 @@ API_KEY_24SO_URI=$(az keyvault secret show --name $SECRET_NAME_API_KEY_24SO --va
 API_PWD_24SO=@PwCBergen2020!
 SECRET_NAME_API_PWD_24SO=apipwd24so
 
-script_variables
+script_variables || true
 
 az keyvault secret set\
   --name $SECRET_NAME_API_PWD_24SO\
@@ -364,7 +372,7 @@ az keyvault secret set\
 
 API_PWD_24SO_URI=$(az keyvault secret show --name $SECRET_NAME_API_PWD_24SO --vault-name $KEY_VAULT_NAME --query id -o tsv)
 
-script_variables
+script_variables || true
 
 az keyvault secret set\
   --name $FUNCTION_APP_NAME\
@@ -376,7 +384,7 @@ SQL_CON='Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Sourc
 BLOB_CON='DefaultEndpointsProtocol=https;AccountName=@{linkedService().accountname};'
 KV_URL='https://@{linkedService().keyvaultname}.vault.azure.net/'
 
-script_variables
+script_variables || true
 
 az deployment group create --resource-group $RESOURCE_GROUP\
                          --mode Incremental\
@@ -430,4 +438,3 @@ az deployment group create --resource-group $RESOURCE_GROUP\
 
 # Remove temporary files
 rm /tmp/variables.before /tmp/variables.after
-

@@ -214,7 +214,7 @@
                     "sinks": [
                         {
                             "dataset": {
-                                "referenceName": "d_kunde",
+                                "referenceName": "D_KUNDE",
                                 "type": "DatasetReference"
                             },
                             "name": "SinkDKunde"
@@ -239,7 +239,7 @@
             },
             "dependsOn": [
                 "[concat(variables('factoryId'), '/datasets/ST_24SO_COMPANY')]",
-                "[concat(variables('factoryId'), '/datasets/d_kunde')]"
+                "[concat(variables('factoryId'), '/datasets/D_KUNDE')]"
             ]
         },
         {
@@ -737,7 +737,7 @@
                             "name": "DerivedColumn1"
                         }
                     ],
-                    "script": "parameters{\n\tJOB_NAME as string ('TR_MAN_KUNDEFORDRINGER'),\n\tLASTELOGG as string ('@{pipeline().RunId}')\n}\nsource(output(\n\t\t{Antall dager sen} as string,\n\t\tBetalingsfrist as string,\n\t\t{Betalt dato} as string,\n\t\t{Dager til betalt} as string,\n\t\tElektronisk as string,\n\t\t{Fakturabeløp} as string,\n\t\tFakturadato as string,\n\t\tFakturanummer as string,\n\t\t{Forventet innbetalt} as string,\n\t\tKlage as string,\n\t\t{Kunde ID} as string,\n\t\tLandkode as string,\n\t\tType as string,\n\t\tFK_PERIODE_ID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false) ~> SourceManInputKundefordr\nSourceManInputKundefordr derive({Antall dager sen} = toInteger({Antall dager sen}),\n\t\tBetalingsfrist = toDate(Betalingsfrist),\n\t\t{Betalt dato} = toDate({Betalt dato}),\n\t\t{Dager til betalt} = toInteger({Dager til betalt}),\n\t\t{Fakturabeløp} = toFloat({Fakturabeløp})*10,\n\t\tFakturadato = toDate(Fakturadato),\n\t\tFakturanummer = toLong(Fakturanummer),\n\t\tLandkode = toInteger(Landkode),\n\t\tFK_PERIODE_ID = toInteger(FK_PERIODE_ID)) ~> DerivedColumn1\nDerivedColumn1 sink(input(\n\t\tFK_PERIODE_ID as integer,\n\t\tType as string,\n\t\t{Antall dager sen} as integer,\n\t\tBetalingsfrist as date,\n\t\t{Betalt dato} as date,\n\t\t{Dager til betalt} as integer,\n\t\tElektronisk as string,\n\t\t{Fakturabeløp} as double,\n\t\tFakturadato as date,\n\t\tFakturanummer as long,\n\t\t{Forventet innbetalt} as string,\n\t\tKlage as string,\n\t\t{Kunde ID} as string,\n\t\tLandkode as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\ttruncate:true,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
+                    "script": "parameters{\n\tJOB_NAME as string ('TR_MAN_KUNDEFORDRINGER'),\n\tLASTELOGG as string ('@{pipeline().RunId}')\n}\nsource(output(\n\t\t{Antall dager sen} as string,\n\t\tBetalingsfrist as string,\n\t\t{Betalt dato} as string,\n\t\t{Dager til betalt} as string,\n\t\tElektronisk as string,\n\t\t{Fakturabeløp} as string,\n\t\tFakturadato as string,\n\t\tFakturanummer as string,\n\t\t{Forventet innbetalt} as string,\n\t\tKlage as string,\n\t\t{Kunde ID} as string,\n\t\tLandkode as string,\n\t\tType as string,\n\t\tFK_PERIODE_ID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false) ~> SourceManInputKundefordr\nSourceManInputKundefordr derive({Antall dager sen} = toInteger({Antall dager sen}),\n\t\tBetalingsfrist = toDate(Betalingsfrist),\n\t\t{Betalt dato} = toDate({Betalt dato}),\n\t\t{Dager til betalt} = toInteger({Dager til betalt}),\n\t\t{Fakturabeløp} = toDecimal({Fakturabeløp})*10,\n\t\tFakturadato = toDate(Fakturadato),\n\t\tFakturanummer = toLong(Fakturanummer),\n\t\tLandkode = toInteger(Landkode),\n\t\tFK_PERIODE_ID = toInteger(FK_PERIODE_ID)) ~> DerivedColumn1\nDerivedColumn1 sink(input(\n\t\tFK_PERIODE_ID as integer,\n\t\tType as string,\n\t\t{Antall dager sen} as integer,\n\t\tBetalingsfrist as date,\n\t\t{Betalt dato} as date,\n\t\t{Dager til betalt} as integer,\n\t\tElektronisk as string,\n\t\t{Fakturabeløp} as double,\n\t\tFakturadato as date,\n\t\tFakturanummer as long,\n\t\t{Forventet innbetalt} as string,\n\t\tKlage as string,\n\t\t{Kunde ID} as string,\n\t\tLandkode as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\ttruncate:true,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
                 }
             },
             "dependsOn": [
@@ -1292,7 +1292,7 @@
             ]
         },
         {
-            "name": "[concat(parameters('factoryName'), '/d_scenario')]",
+            "name": "[concat(parameters('factoryName'), '/D_SCENARIO')]",
             "type": "Microsoft.DataFactory/factories/datasets",
             "apiVersion": "2018-06-01",
             "properties": {
@@ -1393,7 +1393,7 @@
             ]
         },
         {
-            "name": "[concat(parameters('factoryName'), '/d_prosjekt')]",
+            "name": "[concat(parameters('factoryName'), '/D_PROSJEKT')]",
             "type": "Microsoft.DataFactory/factories/datasets",
             "apiVersion": "2018-06-01",
             "properties": {
@@ -1661,7 +1661,7 @@
             ]
         },
         {
-            "name": "[concat(parameters('factoryName'), '/d_kunde')]",
+            "name": "[concat(parameters('factoryName'), '/D_KUNDE')]",
             "type": "Microsoft.DataFactory/factories/datasets",
             "apiVersion": "2018-06-01",
             "properties": {
@@ -1915,8 +1915,9 @@
                     },
                     {
                         "name": "BELOP",
-                        "type": "float",
-                        "precision": 15
+                        "type": "decimal",
+                        "precision": 13,
+                        "scale": 4
                     },
                     {
                         "name": "FK_LASTELOGG_INSERT_ID",
@@ -1947,7 +1948,7 @@
             ]
         },
         {
-            "name": "[concat(parameters('factoryName'), '/f_kunde_omsetning')]",
+            "name": "[concat(parameters('factoryName'), '/F_KUNDE_OMSETNING')]",
             "type": "Microsoft.DataFactory/factories/datasets",
             "apiVersion": "2018-06-01",
             "properties": {
@@ -1983,8 +1984,9 @@
                     },
                     {
                         "name": "OMSETNING_BOKF_BELOP_SUM",
-                        "type": "float",
-                        "precision": 15
+                        "type": "decimal",
+                        "precision": 13,
+                        "scale": 4
                     },
                     {
                         "name": "TIMER_ANT_SUM",
@@ -1993,8 +1995,9 @@
                     },
                     {
                         "name": "OMSETNING_EST_BELOP_SUM",
-                        "type": "float",
-                        "precision": 15
+                        "type": "decimal",
+                        "precision": 13,
+                        "scale": 4
                     },
                     {
                         "name": "FK_LASTELOGG_INSERT_ID",
@@ -2298,7 +2301,7 @@
             ]
         },
         {
-            "name": "[concat(parameters('factoryName'), '/d_butikk')]",
+            "name": "[concat(parameters('factoryName'), '/D_BUTIKK')]",
             "type": "Microsoft.DataFactory/factories/datasets",
             "apiVersion": "2018-06-01",
             "properties": {
@@ -2841,7 +2844,7 @@
             ]
         },
         {
-            "name": "[concat(parameters('factoryName'), '/d_organisasjon')]",
+            "name": "[concat(parameters('factoryName'), '/D_ORGANISASJON')]",
             "type": "Microsoft.DataFactory/factories/datasets",
             "apiVersion": "2018-06-01",
             "properties": {
@@ -2940,7 +2943,7 @@
             ]
         },
         {
-            "name": "[concat(parameters('factoryName'), '/d_prosjekt_fase')]",
+            "name": "[concat(parameters('factoryName'), '/D_PROSJEKT_FASE')]",
             "type": "Microsoft.DataFactory/factories/datasets",
             "apiVersion": "2018-06-01",
             "properties": {
@@ -3039,7 +3042,7 @@
             ]
         },
         {
-            "name": "[concat(parameters('factoryName'), '/d_selskap')]",
+            "name": "[concat(parameters('factoryName'), '/D_SELSKAP')]",
             "type": "Microsoft.DataFactory/factories/datasets",
             "apiVersion": "2018-06-01",
             "properties": {
@@ -3438,6 +3441,587 @@
             ]
         },
         {
+            "name": "[concat(parameters('factoryName'), '/BLOB_MAN_CHURN')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "azure_blob_storage",
+                    "type": "LinkedServiceReference",
+                    "parameters": {}
+                },
+                "folder": {
+                    "name": "0 Blob"
+                },
+                "annotations": [],
+                "type": "DelimitedText",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobStorageLocation",
+                        "fileName": "MAN_CHURN.csv",
+                        "container": "data-factory-manual-input"
+                    },
+                    "columnDelimiter": ",",
+                    "encodingName": "ISO-8859-1",
+                    "escapeChar": "\\",
+                    "firstRowAsHeader": true,
+                    "quoteChar": "\""
+                },
+                "schema": [
+                    {
+                        "name": "KUNDE_ID",
+                        "type": "String"
+                    },
+                    {
+                        "name": "KJOENN",
+                        "type": "String"
+                    },
+                    {
+                        "name": "PENSJONIST",
+                        "type": "String"
+                    },
+                    {
+                        "name": "PARTNER",
+                        "type": "String"
+                    },
+                    {
+                        "name": "FORSOERGER",
+                        "type": "String"
+                    },
+                    {
+                        "name": "VARIGHET",
+                        "type": "String"
+                    },
+                    {
+                        "name": "TELEFON",
+                        "type": "String"
+                    },
+                    {
+                        "name": "INTERNETT",
+                        "type": "String"
+                    },
+                    {
+                        "name": "SIKKERHETSPAKKE_NETT",
+                        "type": "String"
+                    },
+                    {
+                        "name": "BACKUP",
+                        "type": "String"
+                    },
+                    {
+                        "name": "FORSIKRING",
+                        "type": "String"
+                    },
+                    {
+                        "name": "SUPPORTAVTALE",
+                        "type": "String"
+                    },
+                    {
+                        "name": "STREAMING_TV",
+                        "type": "String"
+                    },
+                    {
+                        "name": "STREAMING_FILM",
+                        "type": "String"
+                    },
+                    {
+                        "name": "KONTRAKTSTYPE",
+                        "type": "String"
+                    },
+                    {
+                        "name": "E_FAKTURA",
+                        "type": "String"
+                    },
+                    {
+                        "name": "BETALINGSMETODE",
+                        "type": "String"
+                    },
+                    {
+                        "name": "INNBETALING_MAANEDLIG",
+                        "type": "String"
+                    },
+                    {
+                        "name": "INNBETALING_TOTALT",
+                        "type": "String"
+                    },
+                    {
+                        "name": "CHURN",
+                        "type": "String"
+                    },
+                    {
+                        "name": "PREDIKERT_CHURN",
+                        "type": "String"
+                    },
+                    {
+                        "name": "CHURNSANNSYNLIGHET",
+                        "type": "String"
+                    },
+                    {
+                        "name": "PERIODER_SIDEN_START",
+                        "type": "String"
+                    },
+                    {
+                        "name": "DATO",
+                        "type": "String"
+                    },
+                    {
+                        "name": "FK_PERIODE_ID",
+                        "type": "String"
+                    },
+                    {
+                        "name": "BETALINGSAUTOMATIKK",
+                        "type": "String"
+                    },
+                    {
+                        "name": "ANTALL_PRODUKTER",
+                        "type": "String"
+                    },
+                    {
+                        "name": "INTERNETTKUNDE",
+                        "type": "String"
+                    },
+                    {
+                        "name": "TILTAK",
+                        "type": "String"
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/azure_blob_storage')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/BLOB_MAN_CHURN_PRODUKT')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "azure_blob_storage",
+                    "type": "LinkedServiceReference",
+                    "parameters": {}
+                },
+                "folder": {
+                    "name": "0 Blob"
+                },
+                "annotations": [],
+                "type": "DelimitedText",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobStorageLocation",
+                        "fileName": "MAN_CHURN_PRODUKT.csv",
+                        "container": "data-factory-manual-input"
+                    },
+                    "columnDelimiter": ",",
+                    "encodingName": "ISO-8859-1",
+                    "escapeChar": "\\",
+                    "firstRowAsHeader": true,
+                    "quoteChar": "\""
+                },
+                "schema": [
+                    {
+                        "name": "PRODUKT",
+                        "type": "String"
+                    },
+                    {
+                        "name": "GJENNOMSNITTLIG_VARIGHET_MND",
+                        "type": "String"
+                    },
+                    {
+                        "name": "GJENNOMSNITTLIG_DB_MND",
+                        "type": "String"
+                    },
+                    {
+                        "name": "GJENNOMSNITTLIG_CHURN_SANNSYNLIGHET",
+                        "type": "String"
+                    },
+                    {
+                        "name": "GJENNOMSNITTLIG_ANTALL_ANDRE_PRODUKTER",
+                        "type": "String"
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/azure_blob_storage')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/MAN_CHURN')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "azure_sql_server",
+                    "type": "LinkedServiceReference",
+                    "parameters": {}
+                },
+                "parameters": {
+                    "tableSchema": {
+                        "type": "string"
+                    }
+                },
+                "folder": {
+                    "name": "6 Demo"
+                },
+                "annotations": [],
+                "type": "AzureSqlTable",
+                "schema": [
+                    {
+                        "name": "KUNDE_ID",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "KJOENN",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "PENSJONIST",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "PARTNER",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "FORSOERGER",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "VARIGHET",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "TELEFON",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "INTERNETT",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "SIKKERHETSPAKKE_NETT",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "BACKUP",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "FORSIKRING",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "SUPPORTAVTALE",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "STREAMING_TV",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "STREAMING_FILM",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "KONTRAKTSTYPE",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "E_FAKTURA",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "BETALINGSMETODE",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "INNBETALING_MAANEDLIG",
+                        "type": "decimal",
+                        "precision": 13,
+                        "scale": 4
+                    },
+                    {
+                        "name": "INNBETALING_TOTALT",
+                        "type": "decimal",
+                        "precision": 13,
+                        "scale": 4
+                    },
+                    {
+                        "name": "CHURN",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "PREDIKERT_CHURN",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "CHURNSANNSYNLIGHET",
+                        "type": "decimal",
+                        "precision": 5,
+                        "scale": 4
+                    },
+                    {
+                        "name": "PERIODER_SIDEN_START",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "DATO",
+                        "type": "date"
+                    },
+                    {
+                        "name": "FK_PERIODE_ID",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "BETALINGSAUTOMATIKK",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "ANTALL_PRODUKTER",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "INTERNETTKUNDE",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "TILTAK",
+                        "type": "nvarchar"
+                    }
+                ],
+                "typeProperties": {
+                    "schema": {
+                        "value": "@dataset().tableSchema",
+                        "type": "Expression"
+                    },
+                    "table": "MAN_CHURN"
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/azure_sql_server')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/MAN_CHURN_PRODUKT')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "azure_sql_server",
+                    "type": "LinkedServiceReference",
+                    "parameters": {}
+                },
+                "parameters": {
+                    "tableSchema": {
+                        "type": "string"
+                    }
+                },
+                "folder": {
+                    "name": "6 Demo"
+                },
+                "annotations": [],
+                "type": "AzureSqlTable",
+                "schema": [
+                    {
+                        "name": "PRODUKT",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "GJENNOMSNITTLIG_VARIGHET_MND",
+                        "type": "decimal",
+                        "precision": 13,
+                        "scale": 4
+                    },
+                    {
+                        "name": "GJENNOMSNITTLIG_DB_MND",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "GJENNOMSNITTLIG_CHURN_SANNSYNLIGHET",
+                        "type": "decimal",
+                        "precision": 13,
+                        "scale": 4
+                    },
+                    {
+                        "name": "GJENNOMSNITTLIG_ANTALL_ANDRE_PRODUKTER",
+                        "type": "decimal",
+                        "precision": 13,
+                        "scale": 4
+                    }
+                ],
+                "typeProperties": {
+                    "schema": {
+                        "value": "@dataset().tableSchema",
+                        "type": "Expression"
+                    },
+                    "table": "MAN_CHURN_PRODUKT"
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/azure_sql_server')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/DEMO_COPY_MAN_CHURN')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "activities": [
+                    {
+                        "name": "CopyFromBlob",
+                        "type": "Copy",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "7.00:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "source": {
+                                "type": "DelimitedTextSource",
+                                "storeSettings": {
+                                    "type": "AzureBlobStorageReadSettings",
+                                    "recursive": true
+                                },
+                                "formatSettings": {
+                                    "type": "DelimitedTextReadSettings"
+                                }
+                            },
+                            "sink": {
+                                "type": "AzureSqlSink",
+                                "preCopyScript": {
+                                    "value": "@{concat('TRUNCATE TABLE ', pipeline().parameters.tableSchema, '.', pipeline().parameters.tableName)}",
+                                    "type": "Expression"
+                                },
+                                "disableMetricsCollection": false
+                            },
+                            "enableStaging": false
+                        },
+                        "inputs": [
+                            {
+                                "referenceName": "BLOB_MAN_CHURN",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        ],
+                        "outputs": [
+                            {
+                                "referenceName": "MAN_CHURN",
+                                "type": "DatasetReference",
+                                "parameters": {
+                                    "tableSchema": {
+                                        "value": "@pipeline().parameters.tableSchema",
+                                        "type": "Expression"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "parameters": {
+                    "tableSchema": {
+                        "type": "string"
+                    },
+                    "tableName": {
+                        "type": "string"
+                    }
+                },
+                "folder": {
+                    "name": "6 Demo/Demo Data"
+                },
+                "annotations": []
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/datasets/BLOB_MAN_CHURN')]",
+                "[concat(variables('factoryId'), '/datasets/MAN_CHURN')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/DEMO_COPY_MAN_CHURN_PRODUKT')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "activities": [
+                    {
+                        "name": "CopyFromBlob",
+                        "type": "Copy",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "7.00:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "source": {
+                                "type": "DelimitedTextSource",
+                                "storeSettings": {
+                                    "type": "AzureBlobStorageReadSettings",
+                                    "recursive": true
+                                },
+                                "formatSettings": {
+                                    "type": "DelimitedTextReadSettings"
+                                }
+                            },
+                            "sink": {
+                                "type": "AzureSqlSink",
+                                "preCopyScript": {
+                                    "value": "@{concat('TRUNCATE TABLE ', pipeline().parameters.tableSchema, '.', pipeline().parameters.tableName)}",
+                                    "type": "Expression"
+                                },
+                                "disableMetricsCollection": false
+                            },
+                            "enableStaging": false
+                        },
+                        "inputs": [
+                            {
+                                "referenceName": "BLOB_MAN_CHURN_PRODUKT",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        ],
+                        "outputs": [
+                            {
+                                "referenceName": "MAN_CHURN_PRODUKT",
+                                "type": "DatasetReference",
+                                "parameters": {
+                                    "tableSchema": {
+                                        "value": "@pipeline().parameters.tableSchema",
+                                        "type": "Expression"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "parameters": {
+                    "tableSchema": {
+                        "type": "string"
+                    },
+                    "tableName": {
+                        "type": "string"
+                    }
+                },
+                "folder": {
+                    "name": "6 Demo/Demo Data"
+                },
+                "annotations": []
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/datasets/BLOB_MAN_CHURN_PRODUKT')]",
+                "[concat(variables('factoryId'), '/datasets/MAN_CHURN_PRODUKT')]"
+            ]
+        },
+        {
             "name": "[concat(parameters('factoryName'), '/RAW_24SO_DEPARTMENT')]",
             "type": "Microsoft.DataFactory/factories/datasets",
             "apiVersion": "2018-06-01",
@@ -3628,8 +4212,9 @@
                     },
                     {
                         "name": "CURRENCY_RATE",
-                        "type": "float",
-                        "precision": 15
+                        "type": "decimal",
+                        "precision": 13,
+                        "scale": 4
                     },
                     {
                         "name": "CURRENCY_UNIT",
@@ -3638,8 +4223,9 @@
                     },
                     {
                         "name": "AMOUNT",
-                        "type": "float",
-                        "precision": 15
+                        "type": "decimal",
+                        "precision": 13,
+                        "scale": 4
                     },
                     {
                         "name": "STAMP_NO",
@@ -3703,8 +4289,9 @@
                     },
                     {
                         "name": "PROJECT_PERCENT",
-                        "type": "float",
-                        "precision": 15
+                        "type": "decimal",
+                        "precision": 5,
+                        "scale": 2
                     },
                     {
                         "name": "PROJECT_VALUE",
@@ -3725,8 +4312,9 @@
                     },
                     {
                         "name": "DEPARTMENT_PERCENT",
-                        "type": "float",
-                        "precision": 15
+                        "type": "decimal",
+                        "precision": 5,
+                        "scale": 2
                     },
                     {
                         "name": "DEPARTMENT_TYPE_ID",
@@ -3743,8 +4331,9 @@
                     },
                     {
                         "name": "EMPLOYEE_PERCENT",
-                        "type": "float",
-                        "precision": 15
+                        "type": "decimal",
+                        "precision": 5,
+                        "scale": 2
                     },
                     {
                         "name": "EMPLOYEE_TYPE_ID",
@@ -3760,8 +4349,9 @@
                     },
                     {
                         "name": "PRODUCT_PERCENT",
-                        "type": "float",
-                        "precision": 15
+                        "type": "decimal",
+                        "precision": 5,
+                        "scale": 2
                     },
                     {
                         "name": "PRODUCT_TYPE_ID",
@@ -3778,8 +4368,9 @@
                     },
                     {
                         "name": "CUSTOMER_PERCENT",
-                        "type": "float",
-                        "precision": 15
+                        "type": "decimal",
+                        "precision": 5,
+                        "scale": 2
                     },
                     {
                         "name": "CUSTOMER_TYPE_ID",
@@ -3796,8 +4387,9 @@
                     },
                     {
                         "name": "CUSTOMER_ORDER_SLIP_PERCENT",
-                        "type": "float",
-                        "precision": 15
+                        "type": "decimal",
+                        "precision": 5,
+                        "scale": 2
                     },
                     {
                         "name": "CUSTOMER_ORDER_SLIP_TYPE_ID",
@@ -3814,8 +4406,9 @@
                     },
                     {
                         "name": "SUPPLIER_ORDER_SLIP_PERCENT",
-                        "type": "float",
-                        "precision": 15
+                        "type": "decimal",
+                        "precision": 5,
+                        "scale": 2
                     },
                     {
                         "name": "SUPPLIER_ORDER_SLIP_TYPE_ID",
@@ -4384,8 +4977,9 @@
                     },
                     {
                         "name": "CURRENCY_RATE",
-                        "type": "float",
-                        "precision": 15
+                        "type": "decimal",
+                        "precision": 13,
+                        "scale": 4
                     },
                     {
                         "name": "CURRENCY_UNIT",
@@ -4394,8 +4988,9 @@
                     },
                     {
                         "name": "AMOUNT",
-                        "type": "float",
-                        "precision": 15
+                        "type": "decimal",
+                        "precision": 13,
+                        "scale": 4
                     },
                     {
                         "name": "STAMP_NO",
@@ -4459,8 +5054,9 @@
                     },
                     {
                         "name": "PROJECT_PERCENT",
-                        "type": "float",
-                        "precision": 15
+                        "type": "decimal",
+                        "precision": 5,
+                        "scale": 2
                     },
                     {
                         "name": "PROJECT_VALUE",
@@ -4481,8 +5077,9 @@
                     },
                     {
                         "name": "DEPARTMENT_PERCENT",
-                        "type": "float",
-                        "precision": 15
+                        "type": "decimal",
+                        "precision": 5,
+                        "scale": 2
                     },
                     {
                         "name": "DEPARTMENT_TYPE_ID",
@@ -4499,8 +5096,9 @@
                     },
                     {
                         "name": "EMPLOYEE_PERCENT",
-                        "type": "float",
-                        "precision": 15
+                        "type": "decimal",
+                        "precision": 5,
+                        "scale": 2
                     },
                     {
                         "name": "EMPLOYEE_TYPE_ID",
@@ -4516,8 +5114,9 @@
                     },
                     {
                         "name": "PRODUCT_PERCENT",
-                        "type": "float",
-                        "precision": 15
+                        "type": "decimal",
+                        "precision": 5,
+                        "scale": 2
                     },
                     {
                         "name": "PRODUCT_TYPE_ID",
@@ -4534,8 +5133,9 @@
                     },
                     {
                         "name": "CUSTOMER_PERCENT",
-                        "type": "float",
-                        "precision": 15
+                        "type": "decimal",
+                        "precision": 5,
+                        "scale": 2
                     },
                     {
                         "name": "CUSTOMER_TYPE_ID",
@@ -4552,8 +5152,9 @@
                     },
                     {
                         "name": "CUSTOMER_ORDER_SLIP_PERCENT",
-                        "type": "float",
-                        "precision": 15
+                        "type": "decimal",
+                        "precision": 5,
+                        "scale": 2
                     },
                     {
                         "name": "CUSTOMER_ORDER_SLIP_TYPE_ID",
@@ -4570,8 +5171,9 @@
                     },
                     {
                         "name": "SUPPLIER_ORDER_SLIP_PERCENT",
-                        "type": "float",
-                        "precision": 15
+                        "type": "decimal",
+                        "precision": 5,
+                        "scale": 2
                     },
                     {
                         "name": "SUPPLIER_ORDER_SLIP_TYPE_ID",
@@ -5594,8 +6196,9 @@
                     },
                     {
                         "name": "Fakturabeløp",
-                        "type": "float",
-                        "precision": 15
+                        "type": "decimal",
+                        "precision": 13,
+                        "scale": 4
                     },
                     {
                         "name": "Fakturadato",
@@ -6069,116 +6672,6 @@
                                 "resource": "https://vault.azure.net"
                             }
                         }
-                    },
-                    {
-                        "name": "Copy Transaction Data",
-                        "type": "Copy",
-                        "dependsOn": [
-                            {
-                                "activity": "Copy 24SO Transaction to Blob",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            }
-                        ],
-                        "policy": {
-                            "timeout": "7.00:00:00",
-                            "retry": 0,
-                            "retryIntervalInSeconds": 30,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "source": {
-                                "type": "DelimitedTextSource",
-                                "storeSettings": {
-                                    "type": "AzureBlobStorageReadSettings",
-                                    "recursive": true
-                                },
-                                "formatSettings": {
-                                    "type": "DelimitedTextReadSettings"
-                                }
-                            },
-                            "sink": {
-                                "type": "AzureSqlSink",
-                                "preCopyScript": {
-                                    "value": "@{concat('TRUNCATE TABLE ', pipeline().parameters.transactionTableSchema, '.', pipeline().parameters.transactionTableName)}",
-                                    "type": "Expression"
-                                },
-                                "disableMetricsCollection": false
-                            },
-                            "enableStaging": false
-                        },
-                        "inputs": [
-                            {
-                                "referenceName": "BLOB_24SO_TRANSACTION",
-                                "type": "DatasetReference",
-                                "parameters": {}
-                            }
-                        ],
-                        "outputs": [
-                            {
-                                "referenceName": "RAW_24SO_TRANSACTION",
-                                "type": "DatasetReference",
-                                "parameters": {}
-                            }
-                        ]
-                    },
-                    {
-                        "name": "Copy Account Data",
-                        "type": "Copy",
-                        "dependsOn": [
-                            {
-                                "activity": "Copy 24SO Account to Blob",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            }
-                        ],
-                        "policy": {
-                            "timeout": "7.00:00:00",
-                            "retry": 0,
-                            "retryIntervalInSeconds": 30,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "source": {
-                                "type": "DelimitedTextSource",
-                                "storeSettings": {
-                                    "type": "AzureBlobStorageReadSettings",
-                                    "recursive": true
-                                },
-                                "formatSettings": {
-                                    "type": "DelimitedTextReadSettings"
-                                }
-                            },
-                            "sink": {
-                                "type": "AzureSqlSink",
-                                "preCopyScript": {
-                                    "value": "@{concat('TRUNCATE TABLE ', pipeline().parameters.accountTableSchema, '.', pipeline().parameters.accountTableName)}",
-                                    "type": "Expression"
-                                },
-                                "disableMetricsCollection": false
-                            },
-                            "enableStaging": false
-                        },
-                        "inputs": [
-                            {
-                                "referenceName": "BLOB_24SO_ACCOUNT",
-                                "type": "DatasetReference",
-                                "parameters": {}
-                            }
-                        ],
-                        "outputs": [
-                            {
-                                "referenceName": "RAW_24SO_ACCOUNT",
-                                "type": "DatasetReference",
-                                "parameters": {}
-                            }
-                        ]
                     },
                     {
                         "name": "Copy 24SO Account to Blob",
@@ -8183,6 +8676,18 @@
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
+                            },
+                            {
+                                "activity": "DEMO_COPY_MAN_CHURN",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            },
+                            {
+                                "activity": "DEMO_COPY_MAN_CHURN_PRODUKT",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
                             }
                         ],
                         "userProperties": [],
@@ -8349,6 +8854,46 @@
                                 "viewColumns": "KONTO_GRUPPE, KONTO_NIVAA, KONTO_OPPSTILLING_KODE, KONTO_OPPSTILLING_NAVN, concat(KONTO_OPPSTILLING_KODE, ' - ', KONTO_OPPSTILLING_NAVN) AS KONTO_OPPSTILLING_KODE_NAVN, KONTO_SUM_FLAGG, KONTO_TYPE, MOR_KONTO_KODE, PK_KONTO_OPPSTILLING_ID"
                             }
                         }
+                    },
+                    {
+                        "name": "DEMO_COPY_MAN_CHURN",
+                        "type": "ExecutePipeline",
+                        "dependsOn": [],
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pipeline": {
+                                "referenceName": "DEMO_COPY_MAN_CHURN",
+                                "type": "PipelineReference"
+                            },
+                            "waitOnCompletion": true,
+                            "parameters": {
+                                "tableSchema": {
+                                    "value": "@pipeline().parameters.schema",
+                                    "type": "Expression"
+                                },
+                                "tableName": "MAN_CHURN"
+                            }
+                        }
+                    },
+                    {
+                        "name": "DEMO_COPY_MAN_CHURN_PRODUKT",
+                        "type": "ExecutePipeline",
+                        "dependsOn": [],
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pipeline": {
+                                "referenceName": "DEMO_COPY_MAN_CHURN_PRODUKT",
+                                "type": "PipelineReference"
+                            },
+                            "waitOnCompletion": true,
+                            "parameters": {
+                                "tableSchema": {
+                                    "value": "@pipeline().parameters.schema",
+                                    "type": "Expression"
+                                },
+                                "tableName": "MAN_CHURN_PRODUKT"
+                            }
+                        }
                     }
                 ],
                 "parameters": {
@@ -8370,7 +8915,9 @@
                 "[concat(variables('factoryId'), '/pipelines/DEMO_COPY_24SO_TRANSACTION_ST')]",
                 "[concat(variables('factoryId'), '/pipelines/DEMO_ORC_MAN_INPUT_KUNDEFORDRINGER')]",
                 "[concat(variables('factoryId'), '/pipelines/ORC_MAN_DATO_ST')]",
-                "[concat(variables('factoryId'), '/pipelines/COPY_GRL_KONTO_OPPSTILLING')]"
+                "[concat(variables('factoryId'), '/pipelines/COPY_GRL_KONTO_OPPSTILLING')]",
+                "[concat(variables('factoryId'), '/pipelines/DEMO_COPY_MAN_CHURN')]",
+                "[concat(variables('factoryId'), '/pipelines/DEMO_COPY_MAN_CHURN_PRODUKT')]"
             ]
         }
     ]

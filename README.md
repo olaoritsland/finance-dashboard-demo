@@ -85,8 +85,8 @@ cd finance-dashboard-demo/
 git remote rm origin
 git remote add origin "https://github.com/<my-username>/finance-dashboard-demo.git"
 
-# Push to remote git master branch
-git push -u origin master
+# Push to remote branch and set up tracking
+git push --all origin -u
 ```
 
 [Note: After pushing to your remote repository you will likely receive an email from GitHub stating that a deployment failed. This is because a GitHub action is set up in the repository which triggers deployment of a Python project to Azure Functions every time something is pushed to your repository. This deployment is not currently authenticated, but we will fix this later]

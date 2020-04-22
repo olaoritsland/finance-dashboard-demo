@@ -177,7 +177,7 @@ You will trigger the main orchestration pipeline, which is baded on data from 24
 
 **2. Select your Data Factory**
 
-![Select Data Factory](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/select_adf.png)
+![Select Data Factory](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/select_adf.PNG)
 
 **3. Go to *Pipelines* &rarr; *Trigger Orchestration* &rarr; *ORC_FULL_REFRESH* and select *Add trigger* &rarr; *Trigger now*. Keep the default parameter values and select *OK***
 
@@ -187,17 +187,37 @@ You will trigger the main orchestration pipeline, which is baded on data from 24
 
 **5. Select the monitor icon in the left tab to monitor the execution of your pipeline runs**
 
-![Monitor](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/monitor.png)
+![Monitor](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/monitor.PNG)
 
 Once the orchestration has completed, the tables are available for use. If you would like to, you may inspect and query them in a database tool, like for instance [SQL Server Management Studio](https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms?view=sql-server-ver15).
 
 ### PowerBI Configuration
 
-We will now connect Power BI to the SQL Database you have set up. We will connect to tables in the demo schema as the data stored in these tables looks more real than the data from the 24SevenOffice test clients.
+When the Data Factory loads have completed you can connect Power BI to the SQL Database you have set up using the Power BI file [demo_dashboard.pbix](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/master/dashboards/demo_dashboard.pbix). The database connection in the file is parameterized, so you only need to change the SQL server name, SQL database name and the schema that you want to connect to. It is better to use the demo data than the 24SevenOffice test data for this purpose.
+
+**1. Open the Power BI file demo_dashboard.pbix**
+
+**2. Select *Rediger spørringer* &rarr; *Rediger parametere***
+
+![Rediger spoerringer](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/rediger_spoerringer.gif)
+
+**3. Replace the values for *sql_server_connection* and *sql_db_name* with your own**
+
+*sql_server_connection* has the format `[your-sqlserver-name].database.windows.net`. Replace `[your-sqlserver-name]` with the name of your SQL server.
+
+**4. You should now be able to get data from your database. If you have problems it may be because your public IP address has changed since you set up the Azure connection. To fix this go to portal.azure.com, search for *sql servers*, select your sql server, select *Firewalls and virtual networks* under *Security*, click *Add client IP* and save**
 
 ## Contributing
 
-### Step 1
+### Contributing to the project
+
+Our goal is to develop the project further by improving the integrations and ETL flows we have already set up and add integrations with more accounting systems. If you want to contribute, please contact me (oystein.hellenes.grov@pwc.com) for more information.
+
+We are looking to set up a shared Azure user subscription for PwC Bergen in order to make cooperation easier. Currently, you may allow other users access to your resource group, but your subscription will be charged for the activity in the resource group. 
+
+### Contributing to this GitHub repo
+
+#### Step 1
 
 - **Option 1**
     - 🍴 Fork this repo! (not currently permitted in the organization)
@@ -205,7 +225,7 @@ We will now connect Power BI to the SQL Database you have set up. We will connec
 - **Option 2**
     - 👯 Clone this repo to your local machine using `https://github.com/PWCNORWAY/finans-dashboard-demo.git`
 
-### Step 2
+#### Step 2
 
 - **HACK AWAY!** 🔨🔨🔨
 

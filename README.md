@@ -116,6 +116,9 @@ git push --all origin -u
 **8. The script will prompt you to set the following variables:**
 
 * `PROJECT_NAME` - Should be only alphanumeric characters. As both Azure Storage Account and Azure Key Vault names must be unique, and they are both prefixed with `PROJECT_NAME`, it is an advantage if `PROJECT_NAME` is prefixed with a value, e.g. your name, rather than just "test"
+
+* `MY_IP_ADDRESS` - Input your public IP address. You will find it by googling "my ip"
+
 * `DBSERVER_ADMIN_PASSWORD` - Must adhere to SQL Server password requirements. The password should have at least eight characters, not contain the username and contain at least three of these four characters:
 
    * A lowercase letter

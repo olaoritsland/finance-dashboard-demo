@@ -205,7 +205,11 @@ When the Data Factory loads have completed you can connect Power BI to the SQL D
 
 *sql_server_connection* has the format `[your-sqlserver-name].database.windows.net`. Replace `[your-sqlserver-name]` with the name of your SQL server.
 
-**4. You should now be able to get data from your database. If you have problems it may be because your public IP address has changed since you set up the Azure connection. To fix this go to portal.azure.com, search for *sql servers*, select your sql server, select *Firewalls and virtual networks* under *Security*, click *Add client IP* and save**
+**4. If you are prompted to log in, select *Database* in the left menu and log in with your SQL database credentials**
+
+![Log in](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/database_login.png)
+
+**5. You should now be able to get data from your database. If you have problems it may be because your public IP address has changed since you set up the Azure connection. To fix this go to portal.azure.com, search for *sql servers*, select your sql server, select *Firewalls and virtual networks* under *Security*, click *Add client IP* and save**
 
 ## Contributing
 

@@ -7413,14 +7413,6 @@
                             },
                             "waitOnCompletion": true,
                             "parameters": {
-                                "UID": "oystein.hellenes.grov@pwc.com",
-                                "START_DATE": "1900-01-01",
-                                "END_DATE": "2021-02-01",
-                                "BLOB_ACCOUNT_NAME": "findemostorage1",
-                                "transactionTableName": "RAW_24SO_TRANSACTION",
-                                "accountTableName": "RAW_24SO_ACCOUNT",
-                                "accountFunctionName": "get_account_list",
-                                "transactionFunctionName": "get_transactions",
                                 "transactionTableSchema": {
                                     "value": "@pipeline().parameters.schema",
                                     "type": "Expression"

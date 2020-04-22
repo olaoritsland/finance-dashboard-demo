@@ -171,13 +171,13 @@ In the repository there is a file called `.github/workflows/linux-python-functio
 ### Data Factory Configuration
 
 Once you have Azure Function set up, the Data Factory is available for use. You may now trigger the full refresh orchestration pipelines to populate your Azure SQL Database.
-You will trigger the main orchestration pipeline, which is based on data from 24SevenOffice test clients and the demo orchestration pipeline which is based on generated data stored in flat files.
+You will trigger the main orchestration pipeline, which is baded on data from 24SevenOffice test clients and the demo orchestration pipeline which is based on generated data stored in flat files.
 
 **1. Go to adf.azure.com**
 
 **2. Select your Data Factory**
 
-![Select Data Factory](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/select_adf.PNG)
+![Select Data Factory](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/select_adf.png)
 
 **3. Go to *Pipelines* &rarr; *Trigger Orchestration* &rarr; *ORC_FULL_REFRESH* and select *Add trigger* &rarr; *Trigger now*. Keep the default parameter values and select *OK***
 
@@ -187,7 +187,7 @@ You will trigger the main orchestration pipeline, which is based on data from 24
 
 **5. Select the monitor icon in the left tab to monitor the execution of your pipeline runs**
 
-![Monitor](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/monitor.PNG)
+![Monitor](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/monitor.png)
 
 Once the orchestration has completed, the tables are available for use. If you would like to, you may inspect and query them in a database tool, like for instance [SQL Server Management Studio](https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms?view=sql-server-ver15).
 

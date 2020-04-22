@@ -8808,7 +8808,12 @@
                                 "type": "PipelineReference"
                             },
                             "waitOnCompletion": true,
-                            "parameters": {}
+                            "parameters": {
+                                "tableSchema": {
+                                    "value": "@pipeline().parameters.schema",
+                                    "type": "Expression"
+                                }
+                            }
                         }
                     },
                     {

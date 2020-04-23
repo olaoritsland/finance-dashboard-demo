@@ -11,7 +11,7 @@ on:
 # Note: Can alternatively use a service principle and the AZURE_CREDENTIALS secret
 # 2. Change these variables for your configuration:
 env:
-  AZURE_FUNCTIONAPP_NAME: 'findemo-func' # set this to your application's name
+  AZURE_FUNCTIONAPP_NAME: 'func-ogr003' # set this to your application's name
   AZURE_FUNCTIONAPP_PACKAGE_PATH: './azfunc'   # set this to the path to your web app project, defaults to the repository root
   PYTHON_VERSION: '3.7'                 # set this to the python version to use (supports 3.6, 3.7, 3.8)
 

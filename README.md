@@ -105,11 +105,13 @@ git push --all origin -u
 
 *arm_template.json* contains the textual representation of the Azure Data Factory you will set up.
 
-**6. Open the editor in Cloud Shell by clicking the {} icon and paste the contents of *azure_set_up_script.sh* from your local repository**
+**6. Open the editor in Cloud Shell by clicking the {} icon and paste the contents of *azure_setup_script.sh* from your local repository**
 
 [Note: It may seem unnecessary to copy the content, paste it and save it to file instead of uploading the file to clouddrive and editing it. However, this is an easy way to avoid that the shell script fails because of [Windows-style line endings](https://stackoverflow.com/questions/426397/do-line-endings-differ-between-windows-and-linux)].
 
-**7. Use Crtl+S to save the script and name it *azure_set_up_script.sh*. Execute the script in the Cloud Shell by running `bash azure_set_up_script.sh`:**
+If you want to familiarize yourself with the content of this setup script, you can take a look at the markdown version *azure_setup_script.md* which contains more verbose comments.
+
+**7. Use Crtl+S to save the script and name it *azure_setup_script.sh*. Execute the script in the Cloud Shell by running `bash azure_setup_script.sh`:**
 
 ![Script](https://github.com/PWCNORWAY/finance-dashboard-demo/blob/media/script.gif)
 

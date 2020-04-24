@@ -44,17 +44,17 @@ sed -i 's/^..//' variables.txt
 ### Input parameters
 #Project name should be only alphanumeric characters
 echo "Input your desired project name. All characters must be alphanumeric:"
-read PROJECT_NAME
+read -p "Project name: " PROJECT_NAME
 
 while [[ "$PROJECT_NAME" =~ [^a-zA-Z0-9] ]]
   do
     echo "Invalid project name. Remember that all characters must be alphanumeric"
     echo "Input your desired project name:"
-    read PROJECT_NAME
+    read -p "Project name: " PROJECT_NAME
   done
 
 echo "Input your public ip address, which you can find på googling \"my ip\""
-read MY_IP_ADDRESS
+read -p "IP Address: " MY_IP_ADDRESS
 while ! [[ $MY_IP_ADDRESS =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]
   do
     echo "Invalid IP address. Please enter your IP address:"
@@ -76,7 +76,7 @@ NAME_AVAILABLE=$(az storage account check-name --name ${STORAGE_ACCOUNT_NAME} --
 while [ $NAME_AVAILABLE = 'false' ]
   do
     echo "Storage account name $STORAGE_ACCOUNT_NAME is taken, please choose a different name:"
-    read STORAGE_ACCOUNT_NAME
+    read -p "Storage account name: " STORAGE_ACCOUNT_NAME
     NAME_AVAILABLE=$(az storage account check-name --name ${STORAGE_ACCOUNT_NAME} --query nameAvailable -o tsv)
   done
 
@@ -95,9 +95,13 @@ DBSERVER_ADMIN_USER=serveradmin
 
 # Database server password.
 echo "Input your desired database server password"
-echo "The password cannot contain the username, ${DBSERVER_ADMIN_USER}, and must contain at least three of the following: an uppercase letter, a lowercase letter, a number, a special character like !, $, % or #"
+echo "The password cannot contain the username, ${DBSERVER_ADMIN_USER}, and must contain at least three of the following:"
+echo "* An uppercase letter"
+echo "* A lowercase letter"
+echo "* A number"
+echo "* A special character like !, $, % or #"
 echo "No data validation is implemented, so take care when selecting your password"
-read DBSERVER_ADMIN_PASSWORD
+read -p "DB server admin password: " DBSERVER_ADMIN_PASSWORD
 
 DBSERVER_NAME=sql-$PROJECT_NAME
 DB_NAME=sqldb-$PROJECT_NAME
@@ -204,6 +208,25 @@ SOURCE_CONTAINER=data-factory-manual-input
 
 DF_SHARED_ACCESS_KEY="se=2025-01-01&sp=rl&sv=2018-11-09&sr=c&sig=KALHqnqoykOnMk0FFFZS%2B1jMutBEP5z7WgGzr9aO3X8%3D"
 BACPAC_SHARED_ACCESS_KEY="se=2025-01-01&sp=rl&sv=2018-11-09&sr=c&sig=m6ZcmWUfCg/Jj3RizJtl0dMExNBWuw10Iu/P3m9yWHU%3D"
+
+script_variables || true
+
+############################# #
+# Deploy functionapp
+############################# #
+
+az functionapp create --consumption-plan-location $RESOURCE_LOCATION \
+                      --os-type Linux \
+                      --name $FUNCTION_APP_NAME \
+                      --storage-account $STORAGE_ACCOUNT_NAME \
+                      --resource-group $RESOURCE_GROUP \
+                      --functions-version 2\
+                      --runtime python\
+                      --runtime-version 3.7\
+                      --disable-app-insights true
+
+# Get the function app key
+FUNCTION_APP_KEY=$(az rest --method post --uri "/subscriptions/${SUBSCRIPTION}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.Web/sites/${FUNCTION_APP_NAME}/host/default/listKeys?api-version=2018-11-01" --query functionKeys.default -o tsv)
 
 script_variables || true
 
@@ -328,23 +351,6 @@ az keyvault set-policy -n $KEY_VAULT_NAME --object-id $DATA_FACTORY_PRINCIPAL_ID
  
 # Delete all assets
 # az group delete --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION
-
-############################# #
-# Deploy functionapp
-############################# #
-
-az functionapp create --consumption-plan-location $RESOURCE_LOCATION \
-                      --os-type Linux \
-                      --name $FUNCTION_APP_NAME \
-                      --storage-account $STORAGE_ACCOUNT_NAME \
-                      --resource-group $RESOURCE_GROUP \
-                      --functions-version 2\
-                      --runtime python\
-                      --runtime-version 3.7\
-                      --disable-app-insights true
-
-# Get the function app key
-FUNCTION_APP_KEY=$(az rest --method post --uri "/subscriptions/${SUBSCRIPTION}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.Web/sites/${FUNCTION_APP_NAME}/host/default/listKeys?api-version=2018-11-01" --query functionKeys.default -o tsv)
 
 API_KEY_24SO=d887b94b-f831-4bc9-9500-bd7a63875d9c
 SECRET_NAME_API_KEY_24SO=apikey24so

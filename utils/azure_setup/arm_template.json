@@ -196,7 +196,7 @@
             "type": "Microsoft.DataFactory/factories/dataflows",
             "apiVersion": "2018-06-01",
             "properties": {
-                "description": "Skal utvides med data fra enhetsregisteret og næringskoder for å match kilden",
+                "description": "Skal utvides med data fra enhetsregisteret og naeringskoder for aa match kilden",
                 "folder": {
                     "name": "2 Core"
                 },
@@ -433,7 +433,7 @@
                         },
                         {
                             "name": "DerivedColumns",
-                            "description": "Creating/updating the columns 'AccountNo, ClientName, DimensionDepartmentValue, DimensionProjectValue, DimensionEmployeeValue, DimensionProductValue, DimensionCustomerValue, raar, periode, Amount, sum_amount, beloep'\n\nMerk: beloep gjør ingenting slik den er satt opp nå, men det var slik den var satt opp i eksempelet"
+                            "description": "Creating/updating the columns 'AccountNo, ClientName, DimensionDepartmentValue, DimensionProjectValue, DimensionEmployeeValue, DimensionProductValue, DimensionCustomerValue, raar, periode, Amount, sum_amount, beloep'\n\nMerk: beloep gjoer ingenting slik den er satt opp naa, men det var slik den var satt opp i eksempelet"
                         },
                         {
                             "name": "Select2"
@@ -737,7 +737,7 @@
                             "name": "DerivedColumn1"
                         }
                     ],
-                    "script": "parameters{\n\tJOB_NAME as string ('TR_MAN_KUNDEFORDRINGER'),\n\tLASTELOGG as string ('@{pipeline().RunId}')\n}\nsource(output(\n\t\t{Antall dager sen} as string,\n\t\tBetalingsfrist as string,\n\t\t{Betalt dato} as string,\n\t\t{Dager til betalt} as string,\n\t\tElektronisk as string,\n\t\t{Fakturabeløp} as string,\n\t\tFakturadato as string,\n\t\tFakturanummer as string,\n\t\t{Forventet innbetalt} as string,\n\t\tKlage as string,\n\t\t{Kunde ID} as string,\n\t\tLandkode as string,\n\t\tType as string,\n\t\tFK_PERIODE_ID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false) ~> SourceManInputKundefordr\nSourceManInputKundefordr derive({Antall dager sen} = toInteger({Antall dager sen}),\n\t\tBetalingsfrist = toDate(Betalingsfrist),\n\t\t{Betalt dato} = toDate({Betalt dato}),\n\t\t{Dager til betalt} = toInteger({Dager til betalt}),\n\t\t{Fakturabeløp} = toDecimal({Fakturabeløp})*10,\n\t\tFakturadato = toDate(Fakturadato),\n\t\tFakturanummer = toLong(Fakturanummer),\n\t\tLandkode = toInteger(Landkode),\n\t\tFK_PERIODE_ID = toInteger(FK_PERIODE_ID)) ~> DerivedColumn1\nDerivedColumn1 sink(input(\n\t\tFK_PERIODE_ID as integer,\n\t\tType as string,\n\t\t{Antall dager sen} as integer,\n\t\tBetalingsfrist as date,\n\t\t{Betalt dato} as date,\n\t\t{Dager til betalt} as integer,\n\t\tElektronisk as string,\n\t\t{Fakturabeløp} as double,\n\t\tFakturadato as date,\n\t\tFakturanummer as long,\n\t\t{Forventet innbetalt} as string,\n\t\tKlage as string,\n\t\t{Kunde ID} as string,\n\t\tLandkode as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\ttruncate:true,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
+                    "script": "parameters{\n\tJOB_NAME as string ('TR_MAN_KUNDEFORDRINGER'),\n\tLASTELOGG as string ('@{pipeline().RunId}')\n}\nsource(output(\n\t\t{Antall dager sen} as string,\n\t\tBetalingsfrist as string,\n\t\t{Betalt dato} as string,\n\t\t{Dager til betalt} as string,\n\t\tElektronisk as string,\n\t\t{Fakturabeloep} as string,\n\t\tFakturadato as string,\n\t\tFakturanummer as string,\n\t\t{Forventet innbetalt} as string,\n\t\tKlage as string,\n\t\t{Kunde ID} as string,\n\t\tLandkode as string,\n\t\tType as string,\n\t\tFK_PERIODE_ID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false) ~> SourceManInputKundefordr\nSourceManInputKundefordr derive({Antall dager sen} = toInteger({Antall dager sen}),\n\t\tBetalingsfrist = toDate(Betalingsfrist),\n\t\t{Betalt dato} = toDate({Betalt dato}),\n\t\t{Dager til betalt} = toInteger({Dager til betalt}),\n\t\t{Fakturabeloep} = toDecimal({Fakturabeloep})*10,\n\t\tFakturadato = toDate(Fakturadato),\n\t\tFakturanummer = toLong(Fakturanummer),\n\t\tLandkode = toInteger(Landkode),\n\t\tFK_PERIODE_ID = toInteger(FK_PERIODE_ID)) ~> DerivedColumn1\nDerivedColumn1 sink(input(\n\t\tFK_PERIODE_ID as integer,\n\t\tType as string,\n\t\t{Antall dager sen} as integer,\n\t\tBetalingsfrist as date,\n\t\t{Betalt dato} as date,\n\t\t{Dager til betalt} as integer,\n\t\tElektronisk as string,\n\t\t{Fakturabeloep} as double,\n\t\tFakturadato as date,\n\t\tFakturanummer as long,\n\t\t{Forventet innbetalt} as string,\n\t\tKlage as string,\n\t\t{Kunde ID} as string,\n\t\tLandkode as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\ttruncate:true,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
                 }
             },
             "dependsOn": [
@@ -5769,7 +5769,7 @@
                         "type": "String"
                     },
                     {
-                        "name": "Fakturabeløp",
+                        "name": "Fakturabeloep",
                         "type": "String"
                     },
                     {
@@ -6195,7 +6195,7 @@
                         "type": "nvarchar"
                     },
                     {
-                        "name": "Fakturabeløp",
+                        "name": "Fakturabeloep",
                         "type": "decimal",
                         "precision": 13,
                         "scale": 4

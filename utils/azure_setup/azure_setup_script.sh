@@ -145,6 +145,7 @@ do
    az keyvault create\
    --location $RESOURCE_LOCATION\
    --name $KEY_VAULT_NAME\
+   --enable-soft-delete true\
    --resource-group $RESOURCE_GROUP && break
    n=$[$n+1]
    sleep 15

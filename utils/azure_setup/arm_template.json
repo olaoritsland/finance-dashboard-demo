@@ -6734,11 +6734,11 @@
                     },
                     "SEARCH_START_DATE": {
                         "type": "string",
-                        "defaultValue": "1900-01-01"
+                        "defaultValue": "2019-01-01"
                     },
                     "SEARCH_END_DATE": {
                         "type": "string",
-                        "defaultValue": "2021-01-31"
+                        "defaultValue": "2019-06-30"
                     },
                     "SQL_SERVER_NAME": {
                         "type": "string",

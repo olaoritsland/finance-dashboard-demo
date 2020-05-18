@@ -444,4 +444,4 @@ az deployment group create --resource-group $RESOURCE_GROUP\
 }"
 
 # Remove temporary files
-rm /tmp/variables.before /tmp/variables.after
+#rm /tmp/variables.before /tmp/variables.after

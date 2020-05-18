@@ -139,8 +139,8 @@ az group create \
 
 # Key vault may fail with a HTTP error. Most times the session must be restarted, but attempting retry first
 n=0
-retries=3
-until [ $n -ge $retries ]
+retries=1
+until [ $n -gt $retries ]
 do
    az keyvault create\
    --location $RESOURCE_LOCATION\

@@ -56,15 +56,14 @@ The project name should be only alphanumeric characters as the storage account n
 Prompt the user for their project name. If the user enters an invalid project name, they will be prompted to input a different project name until they have entered a valid name.
 
 ```bash
-#Project name should be only alphanumeric characters
 echo "Input your desired project name. All characters must be alphanumeric:"
-read PROJECT_NAME
+read -p "Project name: " PROJECT_NAME
 
 while [[ "$PROJECT_NAME" =~ [^a-zA-Z0-9] ]]
   do
     echo "Invalid project name. Remember that all characters must be alphanumeric"
     echo "Input your desired project name:"
-    read PROJECT_NAME
+    read -p "Project name: " PROJECT_NAME
   done
 ```
 
@@ -74,7 +73,7 @@ The IP address must be valid in order to proceed.
 
 ```bash
 echo "Input your public ip address, which you can find på googling \"my ip\""
-read MY_IP_ADDRESS
+read -p "IP Address: " MY_IP_ADDRESS
 while ! [[ $MY_IP_ADDRESS =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]
   do
     echo "Invalid IP address. Please enter your IP address:"
@@ -103,7 +102,7 @@ NAME_AVAILABLE=$(az storage account check-name --name ${STORAGE_ACCOUNT_NAME} --
 while [ $NAME_AVAILABLE = 'false' ]
   do
     echo "Storage account name $STORAGE_ACCOUNT_NAME is taken, please choose a different name:"
-    read STORAGE_ACCOUNT_NAME
+    read -p "Storage account name: " STORAGE_ACCOUNT_NAME
     NAME_AVAILABLE=$(az storage account check-name --name ${STORAGE_ACCOUNT_NAME} --query nameAvailable -o tsv)
   done
 ```
@@ -131,9 +130,13 @@ DBSERVER_ADMIN_USER=serveradmin
 
 # Database server password.
 echo "Input your desired database server password"
-echo "The password cannot contain the username, ${DBSERVER_ADMIN_USER}, and must contain at least three of the following: an uppercase letter, a lowercase letter, a number, a special character like !, $, % or #"
+echo "The password cannot contain the username, ${DBSERVER_ADMIN_USER}, and must contain at least three of the following:"
+echo "* An uppercase letter"
+echo "* A lowercase letter"
+echo "* A number"
+echo "* A special character like !, $, % or #"
 echo "No data validation is implemented, so take care when selecting your password"
-read DBSERVER_ADMIN_PASSWORD
+read -p "DB server admin password: " DBSERVER_ADMIN_PASSWORD
 
 DBSERVER_NAME=sql-$PROJECT_NAME
 DB_NAME=sqldb-$PROJECT_NAME
@@ -155,7 +158,7 @@ This command finds your Visual Studio Enterprise Subscription if you have one.
 
 
 ```
-# Find Visual Studio Enterprise Subscription, otherwise find your
+#Find Visual Studio Enterprise Subscription, otherwise find your
 SUBSCRIPTION=$(az account list --query "[].{Name:name, ID:id}[?contains(Name,'Visual Studio')].ID" -o tsv)
 ```
 
@@ -201,13 +204,15 @@ Create a key vault. This command may fail with a HTTP error. Most times the sess
 # Create Key Vault
 ############################# #
 
+# Key vault may fail with a HTTP error. Most times the session must be restarted, but attempting retry first
 n=0
-retries=3
-until [ $n -ge $retries ]
+retries=1
+until [ $n -gt $retries ]
 do
    az keyvault create\
    --location $RESOURCE_LOCATION\
    --name $KEY_VAULT_NAME\
+   --enable-soft-delete true\
    --resource-group $RESOURCE_GROUP && break
    n=$[$n+1]
    sleep 15
@@ -298,6 +303,32 @@ BACPAC_SHARED_ACCESS_KEY="se=2025-01-01&sp=rl&sv=2018-11-09&sr=c&sig=m6ZcmWUfCg/
 script_variables || true
 ```
 
+Deploy a Python 3.7 Function App. This does not deploy any code to your Function App.
+
+```bash
+############################# #
+# Deploy functionapp
+############################# #
+
+az functionapp create --consumption-plan-location $RESOURCE_LOCATION \
+                      --os-type Linux \
+                      --name $FUNCTION_APP_NAME \
+                      --storage-account $STORAGE_ACCOUNT_NAME \
+                      --resource-group $RESOURCE_GROUP \
+                      --functions-version 2\
+                      --runtime python\
+                      --runtime-version 3.7\
+                      --disable-app-insights true
+```
+
+Get the Function App key.
+
+```bash
+FUNCTION_APP_KEY=$(az rest --method post --uri "/subscriptions/${SUBSCRIPTION}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.Web/sites/${FUNCTION_APP_NAME}/host/default/listKeys?api-version=2018-11-01" --query functionKeys.default -o tsv)
+
+script_variables || true
+```
+
 Copy the content of the *data-factory-manual-input* container from `sharingiscaring01` to your storage account. Do the same with the .bacpac-file
 
 ```bash
@@ -351,6 +382,7 @@ function create_sql_server()
 Create a secret to store database server admin password and create a database on the SQL Server
 
 ```bash
+# Create secret to store database server admin password
 az keyvault secret set\
   --name $DBSERVER_NAME\
   --vault-name $KEY_VAULT_NAME\
@@ -386,6 +418,7 @@ az sql server firewall-rule create --resource-group $RESOURCE_GROUP\
 Populate the database with schema from .bacpac-file stored in blob
 
 ```bash
+# Populate database with data/schema from bacpac file stored in blob
 az sql db import --resource-group $RESOURCE_GROUP\
                  --server $DBSERVER_NAME\
                  --name $DB_NAME\
@@ -399,6 +432,7 @@ az sql db import --resource-group $RESOURCE_GROUP\
 Get the uri of the Key Vault secret containing DB password. You will require this in the Data Factory pipeline which loads data from 24SevenOffice.
 
 ```bash
+# Get uri of Key Vault secret containing DB password
 DBSERVER_ADMIN_PASSWORD_URI=$(az keyvault secret show --name $DBSERVER_NAME --vault-name $KEY_VAULT_NAME --query id -o tsv)
 
 script_variables || true
@@ -420,6 +454,7 @@ az resource create --resource-group $RESOURCE_GROUP\
 Get Data Factory principal ID and allow Data Factory to get and list secrets in Azure Key Vault
 
 ```bash
+# Get Data Factory principal ID and allow Data Factory to get and list secrets in Azure Key Vault
 DATA_FACTORY_PRINCIPAL_ID=$(az resource list -n $DATA_FACTORY_NAME -g $RESOURCE_GROUP --resource-type "Microsoft.DataFactory/factories" --query [0].identity.principalId -o tsv)
 
 script_variables || true
@@ -427,29 +462,9 @@ script_variables || true
 az keyvault set-policy -n $KEY_VAULT_NAME --object-id $DATA_FACTORY_PRINCIPAL_ID --secret-permissions get list
 ```
 
-Deploy a Python 3.7 Function App. This does not deploy any code to your Function App.
+Get the API keys to 24SevenOffice in Key Vault. You will require these in the Data Factory pipeline which loads data from 24SevenOffice.
 
 ```bash
-############################# #
-# Deploy functionapp
-############################# #
-
-az functionapp create --consumption-plan-location $RESOURCE_LOCATION \
-                      --os-type Linux \
-                      --name $FUNCTION_APP_NAME \
-                      --storage-account $STORAGE_ACCOUNT_NAME \
-                      --resource-group $RESOURCE_GROUP \
-                      --functions-version 2\
-                      --runtime python\
-                      --runtime-version 3.7\
-                      --disable-app-insights true
-```
-
-Get the Function App key and store it and the API keys to 24SevenOffice in Key Vault. You will require these in the Data Factory pipeline which loads data from 24SevenOffice.
-
-```bash
-FUNCTION_APP_KEY=$(az rest --method post --uri "/subscriptions/${SUBSCRIPTION}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.Web/sites/${FUNCTION_APP_NAME}/host/default/listKeys?api-version=2018-11-01" --query functionKeys.default -o tsv)
-
 API_KEY_24SO=d887b94b-f831-4bc9-9500-bd7a63875d9c
 SECRET_NAME_API_KEY_24SO=apikey24so
 
@@ -477,13 +492,21 @@ az keyvault secret set\
 API_PWD_24SO_URI=$(az keyvault secret show --name $SECRET_NAME_API_PWD_24SO --vault-name $KEY_VAULT_NAME --query id -o tsv)
 
 script_variables || true
+```
 
+Store function app key in Key Vault:
+
+```bash
 az keyvault secret set\
   --name $FUNCTION_APP_NAME\
   --vault-name $KEY_VAULT_NAME\
   --subscription $SUBSCRIPTION\
   --value $FUNCTION_APP_KEY
+```
 
+Define dynamic connection strings to use in Azure Data Factory:
+
+```bash
 SQL_CON='Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=@{linkedService().datasourceprefix}.database.windows.net;Initial Catalog=@{linkedService().dbname};User ID=@{linkedService().sqlusername}'
 BLOB_CON='DefaultEndpointsProtocol=https;AccountName=@{linkedService().accountname};'
 KV_URL='https://@{linkedService().keyvaultname}.vault.azure.net/'
